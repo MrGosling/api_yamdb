@@ -1,10 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-ROLE_TYPE = ['user', 'moderator', 'admin']
-
 
 class User(AbstractUser):
+    ROLE_TYPE = [
+        ('user', 'User'),
+        ('moderator', 'Moderator'),
+        ('admin', 'Admin'),
+    ]
+
     bio = models.TextField(
         'Биография',
         null=True,
