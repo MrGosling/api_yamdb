@@ -43,7 +43,6 @@ class Category(BaseModel):
     slug = models.SlugField(unique=True)
 
 
-
 class Title(BaseModel):
     year = models.IntegerField
     rating = models.IntegerField
