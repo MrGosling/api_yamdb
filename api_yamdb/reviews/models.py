@@ -3,7 +3,11 @@ from django.db import models
 
 
 class User(AbstractUser):
-    ROLE_TYPE = ['user', 'moderator', 'admin']
+    ROLE_TYPE = [
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin'),
+    ]
 
     bio = models.TextField(
         'Биография',
