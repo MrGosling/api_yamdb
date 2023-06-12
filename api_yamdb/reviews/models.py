@@ -3,17 +3,14 @@ from reviews.base_models import BaseModel
 
 
 class Genre(BaseModel):
-    # name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
 class Category(BaseModel):
-    # name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
 class Title(BaseModel):
-    # name = models.CharField(max_length=200)
     year = models.IntegerField
     rating = models.IntegerField
     description = models.TextField()
