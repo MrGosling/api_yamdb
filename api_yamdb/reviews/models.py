@@ -1,18 +1,19 @@
 from django.db import models
+from reviews.base_models import BaseModel
 
 
-class Genre(models.Model):
-    name = models.CharField(max_length=200)
+class Genre(BaseModel):
+    # name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
-class Category(models.Model):
-    name = models.CharField(max_length=200)
+class Category(BaseModel):
+    # name = models.CharField(max_length=200)
     slug = models.SlugField(unique=True)
 
 
-class Title(models.Model):
-    name = models.CharField(max_length=200)
+class Title(BaseModel):
+    # name = models.CharField(max_length=200)
     year = models.IntegerField
     rating = models.IntegerField
     description = models.TextField()
