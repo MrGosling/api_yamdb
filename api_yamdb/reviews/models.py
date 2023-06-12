@@ -3,14 +3,6 @@ from django.db import models
 from reviews.base_models import BaseModel
 
 
-class Genre(BaseModel):
-    slug = models.SlugField(unique=True)
-
-
-class Category(BaseModel):
-    slug = models.SlugField(unique=True)
-
-
 class CustomUser(AbstractUser):
     ROLE_TYPE = [
         ('user', 'user'),
@@ -41,6 +33,15 @@ class CustomUser(AbstractUser):
                 name='unique_email'
             )
         ]
+
+
+class Genre(BaseModel):
+    slug = models.SlugField(unique=True)
+
+
+class Category(BaseModel):
+    slug = models.SlugField(unique=True)
+
 
 
 class Title(BaseModel):
