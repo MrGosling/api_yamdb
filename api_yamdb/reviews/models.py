@@ -67,7 +67,7 @@ class Title(BaseModel):
 class Review(models.Model):
     """Модель отзывов на произведения, а так же их рейтинг"""
     author = models.ForeignKey(
-        # CustomUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Автор',
@@ -81,7 +81,7 @@ class Review(models.Model):
         auto_now_add=True,
     )
     title = models.ForeignKey(
-        # Title,
+        Title,
         on_delete=models.CASCADE,
         related_name='reviews',
         verbose_name='Произведение',
@@ -104,7 +104,7 @@ class Review(models.Model):
 class Comment(models.Model):
     """Модель комментариев к отзыву произведений."""
     author = models.ForeignKey(
-        # CustomUser,
+        CustomUser,
         on_delete=models.CASCADE,
         related_name='comments',
         verbose_name='Автор'
