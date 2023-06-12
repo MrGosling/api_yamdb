@@ -20,7 +20,11 @@ class User(AbstractUser):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['username', 'email'],
-                name='unique_username_email'
+                fields=['username'],
+                name='unique_username'
+            ),
+            models.UniqueConstraint(
+                fields=['email'],
+                name='unique_email'
             )
         ]
