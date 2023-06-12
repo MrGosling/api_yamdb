@@ -44,6 +44,25 @@ class Category(BaseModel):
     slug = models.SlugField(max_length=50, unique=True)
 
 
+class Title(BaseModel):
+    year = models.IntegerField
+    rating = models.IntegerField
+    description = models.TextField()
+    genre = models.ForeignKey(
+        Genre,
+        blank=True,
+        null=True,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+    )
+    category = models.ForeignKey(
+        Category,
+        blank=True,
+        null=True,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+    )
+
 
 class Review(models.Model):
     """Модель отзывов на произведения, а так же их рейтинг"""
@@ -103,22 +122,4 @@ class Comment(models.Model):
     )
 
     class Meta:
-class Title(BaseModel):
-    year = models.IntegerField
-    rating = models.IntegerField
-    description = models.TextField()
-    genre = models.ForeignKey(
-        Genre,
-        blank=True,
-        null=True,
-        related_name='titles',
-        on_delete=models.SET_NULL,
-    )
-    category = models.ForeignKey(
-        Category,
-        blank=True,
-        null=True,
-        related_name='titles',
-        on_delete=models.SET_NULL,
-    )
         ordering = ['-pub_date']
