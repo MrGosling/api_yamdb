@@ -4,11 +4,11 @@ from reviews.base_models import BaseModel
 
 
 class Genre(BaseModel):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
 
 class Category(BaseModel):
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
 
 class CustomUser(AbstractUser):
