@@ -107,4 +107,4 @@ STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
 
 # Модель пользователя для проекта
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = 'reviews.CustomUser'
