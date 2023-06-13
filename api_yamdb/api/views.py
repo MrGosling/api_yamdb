@@ -31,7 +31,7 @@ class UserViewSet(ModelViewSet):
 
     def list(self, request):
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset.first())
+        serializer = UserSerializer(queryset.first())
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
