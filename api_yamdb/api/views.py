@@ -29,13 +29,16 @@ class UserViewSet(ModelViewSet):
     def get_queryset(self):
         return CustomUser.objects.filter(username=self.request.user.username)
 
+    def get_object(self):
+        return self.request.user
+
     def list(self, request):
         queryset = self.get_queryset()
         serializer = UserSerializer(queryset.first())
         return Response(serializer.data)
 
     def partial_update(self, request, *args, **kwargs):
-        user = CustomUser.objects.filter(username=self.request.user.username)
+        user = self.get_object()
         serializer = PartialUserSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
