@@ -22,7 +22,7 @@ class AdminUserViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class UserViewSet(ViewSet):
+class UserViewSet(ModelViewSet):
     serializer_class = PartialUserSerializer
     permission_classes = [UserPermission]
 
