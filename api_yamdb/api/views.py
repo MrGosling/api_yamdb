@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.response import Response
 
 from api.serializers import UserSerializer, PartialUserSerializer
@@ -22,8 +22,8 @@ class AdminUserViewSet(ModelViewSet):
         return Response(serializer.data)
 
 
-class UserViewSet(ModelViewSet):
-    serializer_class = UserSerializer
+class UserViewSet(ViewSet):
+    serializer_class = PartialUserSerializer
     permission_classes = [UserPermission]
 
     def get_queryset(self):

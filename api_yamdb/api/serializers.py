@@ -15,11 +15,9 @@ class UserSerializer(ModelSerializer):
 
 
 class PartialUserSerializer(ModelSerializer):
-    username = CharField(read_only=True)
-    role = CharField(read_only=True)
-
     class Meta:
         model = CustomUser
+        read_only_fields = ('username', 'role', 'email')
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
