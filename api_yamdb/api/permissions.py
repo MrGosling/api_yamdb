@@ -13,3 +13,7 @@ class UserPermission(BasePermission):
         return (
             request.method in ['GET', 'PATCH'] and request.user.is_authenticated
         )
+    #def has_object_permission(self, request, view, obj):
+    #    if request.method in ['PATCH']:
+    #        return obj.user == request.user
+    #    return True

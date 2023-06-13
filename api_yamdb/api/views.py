@@ -1,9 +1,9 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
-#from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from api.serializers import UserSerializer
+from api.serializers import UserSerializer, PartialUserSerializer
 from api.permissions import AdminPermission, UserPermission
 from reviews.models import CustomUser
 
@@ -33,3 +33,10 @@ class UserViewSet(ModelViewSet):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset.first())
         return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        user = CustomUser.objects.filter(username=self.request.user.username)
+        serializer = PartialUserSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)

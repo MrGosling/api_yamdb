@@ -12,3 +12,14 @@ class UserSerializer(ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+
+
+class PartialUserSerializer(ModelSerializer):
+    username = CharField(read_only=True)
+    role = CharField(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
