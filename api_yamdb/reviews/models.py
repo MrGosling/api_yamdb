@@ -47,7 +47,7 @@ class Category(BaseModel):
 class Title(BaseModel):
     year = models.IntegerField
     rating = models.IntegerField
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     genre = models.ForeignKey(
         Genre,
         blank=True,
