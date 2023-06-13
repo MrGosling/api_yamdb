@@ -10,10 +10,9 @@ class AdminPermission(BasePermission):
 
 class UserPermission(BasePermission):
     def has_permission(self, request, view):
-        return (
-            request.method in ['GET', 'PATCH'] and request.user.is_authenticated
-        )
-    #def has_object_permission(self, request, view, obj):
-    #    if request.method in ['PATCH']:
-    #        return obj.user == request.user
-    #    return True
+        if request.method == 'GET' or request.method == 'PATCH':
+            return request.user.is_authenticated
+        return False
+
+    def has_object_permission(self, request, view, obj):
+        return obj.username == request.user.username
