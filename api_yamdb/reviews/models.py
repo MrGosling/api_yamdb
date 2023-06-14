@@ -5,6 +5,7 @@ from reviews.base_models import BaseModel
 
 
 class CustomUser(AbstractUser):
+    """Кастомная модель пользователей"""
     ROLE_TYPE = [
         ('user', 'user'),
         ('moderator', 'moderator'),

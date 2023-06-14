@@ -1,4 +1,9 @@
 from rest_framework import serializers
+from reviews.models import Comment, Review
+from rest_framework.serializers import ModelSerializer, EmailField, CharField
+
+from reviews.models import CustomUser
+from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 import datetime as dt
 from reviews.models import  Category, Genre, Title, Review
@@ -70,8 +75,6 @@ class GenreSerializer(serializers.ModelSerializer):
             'name': {'required': True, 'max_length': 256},
             'slug': {'required': True, 'max_length': 50},
         }
-from rest_framework import serializers
-from reviews.models import Comment, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -111,3 +114,24 @@ class CommentSerializer(serializers.ModelSerializer):
             'title': {'required': False},
             'review': {'required': False}
         }
+
+
+class UserSerializer(ModelSerializer):
+    email = EmailField(required=True)
+    username = CharField(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+
+
+class PartialUserSerializer(ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+        read_only_fields = ('username', 'role', 'email')
+        
