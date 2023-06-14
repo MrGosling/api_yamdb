@@ -124,7 +124,7 @@ REST_FRAMEWORK = {
 }
 SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=14),
 }
 
 # Модуль для сохранения писем в файлы
