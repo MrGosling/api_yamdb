@@ -2,7 +2,7 @@ from rest_framework import serializers
 from reviews.models import Comment, Review
 
 
-class ReviewSerialiser(serializers.ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов для произведений."""
     author = serializers.SlugRelatedField(
         read_only=True,
@@ -16,7 +16,7 @@ class ReviewSerialiser(serializers.ModelSerializer):
         if Review.objects.filter(title=title, author=author).exists():
             if self.context['request'].method == "POST":
                 raise serializers.ValidationError(message)
-            return data
+            # return data (проверить)
         return data
 
     class Meta:
@@ -25,7 +25,7 @@ class ReviewSerialiser(serializers.ModelSerializer):
         extra_kwargs = {'title': {'required': False}}
 
 
-class CommentSerialiser(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор комментариев на отзывы."""
     author = serializers.SlugRelatedField(
         read_only=True,
