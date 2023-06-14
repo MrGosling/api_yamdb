@@ -3,6 +3,7 @@ from rest_framework.relations import SlugRelatedField
 import datetime as dt
 from reviews.models import  Category, Genre, Title, Review
 from django.db.models import Avg
+from rest_framework.exceptions import MethodNotAllowed
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -24,9 +25,15 @@ class TitleSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'name': {'required': True, 'max_length': 256},
             'year': {'required': True},
-            'genre': {'required': True},
-            'category': {'required': True},
         }
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        genres_data = GenreSerializer(instance.genre.all(), many=True).data
+        category_data = CategorySerializer(instance.category).data
+        data['genre'] = genres_data
+        data['category'] = category_data
+        return data
 
     def get_rating(self, obj):
         ratings = Review.objects.filter(title__id=obj.id)
@@ -38,34 +45,28 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Вы из будущего?')
         return value
     
-    # def validate_category(self, value):
-    #     queryset = list(Category.objects.all())
-    #     # queryset = Category.objects.values_list('slug', flat=True)
-    #     if value not in queryset:
-    #         raise serializers.ValidationError('Нет такой категории!11')
-    #     return value
-    
-    # def validate_genre(self, value):
-    #     # queryset = Genre.objects.all()
-    #     print(value)
-    #     queryset = list(Genre.objects.values_list('slug', flat=True))
-    #     print(queryset)
-    #     for genre in value:
-    #         print(type(genre))
-    #         if genre not in queryset:
-    #             raise serializers.ValidationError('Нет такого жанра!11')
-    #     # if value not in queryset:
-    #     #     raise serializers.ValidationError('Нет такой жанра!11')
-    #     return value
+    def update(self, instance, validated_data):
+        if self.partial:
+            return super().update(instance, validated_data)
+        else:
+            raise MethodNotAllowed('PUT')
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug',)
         model = Category
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug',)
         model = Genre
+        extra_kwargs = {
+            'name': {'required': True, 'max_length': 256},
+            'slug': {'required': True, 'max_length': 50},
+        }
