@@ -16,7 +16,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         if Review.objects.filter(title=title, author=author).exists():
             if self.context['request'].method == "POST":
                 raise serializers.ValidationError(message)
-            # return data (проверить)
+            return data
         return data
 
     class Meta:
