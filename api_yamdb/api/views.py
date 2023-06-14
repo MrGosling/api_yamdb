@@ -23,7 +23,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = CategorySerializer
 
 
-class ReviewViewset(viewsets.ModelViewSet):
+class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Review."""
     serializer_class = ReviewSerializer
 
