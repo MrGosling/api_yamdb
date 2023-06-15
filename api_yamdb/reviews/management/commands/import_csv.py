@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 import csv
-from reviews.models import Genre, Category, Title, CustomUser, Review, Comment
+from reviews.models import Genre, Category, Title, CustomUser, Review, Comment, TitleGenre
 
 
 class Command(BaseCommand):
@@ -137,3 +137,18 @@ class Command(BaseCommand):
                         )
         except FileNotFoundError:
             print('Отсутствует файл comments.csv')
+
+        try:
+            with open('static/data/genre_title.csv', 'r', encoding='utf-8') as file:
+                reader = csv.reader(file)
+                next(reader)
+                for row in reader:
+                    id = int(row[0])
+                    title_id = int(row[1])
+                    genre_id = int(row[2])
+                    try:
+                        TitleGenre.objects.get(id=id)
+                    except:
+                        TitleGenre.objects.create(id=id, title_id=title_id, genre_id=genre_id)
+        except FileNotFoundError:
+            print(f'Отсутствует файл genre_title.csv')

@@ -47,16 +47,10 @@ class Category(BaseModel):
 
 class Title(BaseModel):
     year = models.IntegerField()
-    # rating = models.IntegerField()
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(
         Genre,
-        # blank=True,
-        # null=True,
         related_name='titles',
-        # through='TitleGenre',
-        # through_fields=('title', 'genre'),
-        # on_delete=models.SET_NULL,
     )
     category = models.ForeignKey(
         Category,
@@ -64,6 +58,21 @@ class Title(BaseModel):
         null=True,
         related_name='titles',
         on_delete=models.SET_NULL,
+    )
+
+
+class TitleGenre(models.Model):
+    title = models.ForeignKey(
+        Title,
+        related_name='genres',
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    genre = models.ForeignKey(
+        Title,
+        related_name='titles',
+        on_delete=models.SET_NULL,
+        null=True,
     )
 
 
