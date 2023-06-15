@@ -36,6 +36,14 @@ class CustomUser(AbstractUser):
             )
         ]
 
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator' or self.is_superuser
+
 
 class Genre(BaseModel):
     slug = models.SlugField(max_length=50, unique=True)
@@ -98,9 +106,17 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return f"{self.id}"
+        return self.text
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            )
+        ]
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         ordering = ['-pub_date']
 
 
