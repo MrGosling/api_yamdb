@@ -48,9 +48,19 @@ class Command(BaseCommand):
                     year = int(row[2])
                     category = int(row[3])
                     try:
-                        Title.objects.get(id=id, name=name, year=year, category=category)
+                        Title.objects.get(
+                            id=id,
+                            name=name,
+                            year=year,
+                            category=category
+                        )
                     except Title.DoesNotExist:
-                        Title.objects.create(id=id, name=name, year=year, category=category)
+                        Title.objects.create(
+                            id=id,
+                            name=name,
+                            year=year,
+                            category=Category.objects.get(id=category)
+                        )
         except FileNotFoundError:
             print('Что-то не так с файлом')
 
@@ -89,7 +99,7 @@ class Command(BaseCommand):
                     id = int(row[0])
                     title_id = int(row[1])
                     text = row[2]
-                    author = row[3]
+                    author = int(row[3])
                     score = int(row[4])
                     pub_date = row[5]
                     try:
@@ -97,9 +107,9 @@ class Command(BaseCommand):
                     except Review.DoesNotExist:
                         Review.objects.create(
                             id=id,
-                            title=title_id,
+                            title=Title.objects.get(id=title_id),
                             text=text,
-                            author=author,
+                            author=CustomUser.objects.get(id=author),
                             score=score,
                             pub_date=pub_date
                         )
@@ -121,9 +131,9 @@ class Command(BaseCommand):
                     except Comment.DoesNotExist:
                         Comment.objects.create(
                             id=id,
-                            review=review_id,
+                            review=Review.objects.get(id=review_id),
                             text=text,
-                            author=author,
+                            author=CustomUser.objects.get(id=author),
                             pub_date=pub_date
                         )
         except FileNotFoundError:
