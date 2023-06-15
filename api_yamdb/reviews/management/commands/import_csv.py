@@ -1,12 +1,11 @@
-import os
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'api_yamdb.settings')
 from django.core.management.base import BaseCommand
 import csv
-from reviews.models import *
+from reviews.models import Genre, Category, Title, CustomUser, Review, Comment
 
 
 class Command(BaseCommand):
-    
+    help = 'Загрузка данных из определённых csv файлов'
+
     def handle(self, *args, **options):
         try:
             with open('static/data/genre.csv', 'r', encoding='utf-8') as file:
@@ -21,7 +20,7 @@ class Command(BaseCommand):
                     except Genre.DoesNotExist:
                         Genre.objects.create(id=id, name=name, slug=slug)
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл genre.csv')
 
         try:
             with open('static/data/category.csv', 'r', encoding='utf-8') as file:
@@ -36,7 +35,7 @@ class Command(BaseCommand):
                     except Category.DoesNotExist:
                         Category.objects.create(id=id, name=name, slug=slug)
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл category.csv')
 
         try:
             with open('static/data/titles.csv', 'r', encoding='utf-8') as file:
@@ -62,7 +61,7 @@ class Command(BaseCommand):
                             category=Category.objects.get(id=category)
                         )
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл titles.csv')
 
         try:
             with open('static/data/users.csv', 'r', encoding='utf-8') as file:
@@ -89,7 +88,7 @@ class Command(BaseCommand):
                             last_name=last_name
                         )
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл users.csv')
 
         try:
             with open('static/data/review.csv', 'r', encoding='utf-8') as file:
@@ -114,7 +113,7 @@ class Command(BaseCommand):
                             pub_date=pub_date
                         )
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл review.csv')
 
         try:
             with open('static/data/comments.csv', 'r', encoding='utf-8') as file:
@@ -137,4 +136,4 @@ class Command(BaseCommand):
                             pub_date=pub_date
                         )
         except FileNotFoundError:
-            print('Что-то не так с файлом')
+            print('Отсутствует файл comments.csv')
