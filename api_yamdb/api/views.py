@@ -1,22 +1,28 @@
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 
-from api.permissions import AdminPermission, UserPermission
+from api.permissions import AdminPermission, UserPermission, CustomPermission
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from reviews.models import Category, Genre, Title, Review, Title, CustomUser
 from api.mixins import ListCreateDestroyViewSet
-from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer, CommentSerializer, ReviewSerializer, UserSerializer, PartialUserSerializer
+from api.serializers import (CategorySerializer, GenreSerializer,
+                             TitleSerializer, CommentSerializer,
+                             ReviewSerializer, UserSerializer,
+                             PartialUserSerializer)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
 
+
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -26,6 +32,8 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Review."""
     serializer_class = ReviewSerializer
+    permission_classes = [CustomPermission]
+    pagination_class = PageNumberPagination
 
     def get_title(self):
         """Возвращает объект текущего произведения."""
@@ -48,6 +56,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для обьектов модели Comment."""
     serializer_class = CommentSerializer
+    permission_classes = [CustomPermission]
+    pagination_class = PageNumberPagination
 
     def get_review(self):
         """Возвращает объект текущего отзыва."""
@@ -57,7 +67,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         """Возвращает queryset c комментариями для текущего отзыва."""
         return self.get_review().comments.all().order_by('id')
- 
+
     def perform_create(self, serializer):
         """Создает комментарий для текущего отзыва,
         где автором является данный пользователь."""

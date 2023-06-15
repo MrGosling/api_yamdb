@@ -6,7 +6,7 @@ from reviews.models import CustomUser
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 import datetime as dt
-from reviews.models import  Category, Genre, Title, Review
+from reviews.models import Category, Genre, Title, Review
 from django.db.models import Avg
 from rest_framework.exceptions import MethodNotAllowed
 
@@ -24,6 +24,7 @@ class TitleSerializer(serializers.ModelSerializer):
         required=True,
     )
     rating = serializers.SerializerMethodField()
+
     class Meta:
         fields = '__all__'
         model = Title
@@ -49,7 +50,7 @@ class TitleSerializer(serializers.ModelSerializer):
         if value > dt.datetime.now().year:
             raise serializers.ValidationError('Вы из будущего?')
         return value
-    
+
     def update(self, instance, validated_data):
         if self.partial:
             return super().update(instance, validated_data)
@@ -134,4 +135,3 @@ class PartialUserSerializer(ModelSerializer):
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
         read_only_fields = ('username', 'role', 'email')
-        

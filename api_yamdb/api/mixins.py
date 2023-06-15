@@ -1,5 +1,4 @@
-from rest_framework import mixins
-from rest_framework import filters, permissions, viewsets
+from rest_framework import mixins, viewsets
 
 
 class ListCreateDestroyViewSet(
