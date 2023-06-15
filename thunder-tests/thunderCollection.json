@@ -1,0 +1,36 @@
+[
+  {
+    "_id": "e10baeda-47b5-4aa9-aa95-ba407869d960",
+    "colName": "/api",
+    "created": "2023-06-15T09:18:53.926Z",
+    "sortNum": 10000,
+    "folders": [
+      {
+        "_id": "e23c0601-1187-4107-81be-9da8bff30618",
+        "name": "/users",
+        "containerId": "bca1951f-eeb8-4e1a-8151-3a3d577779fb",
+        "created": "2023-06-15T09:19:04.842Z",
+        "sortNum": 10000
+      },
+      {
+        "_id": "bca1951f-eeb8-4e1a-8151-3a3d577779fb",
+        "name": "/v1",
+        "containerId": "",
+        "created": "2023-06-15T09:20:02.585Z",
+        "sortNum": 20000
+      },
+      {
+        "_id": "92bd0375-35e6-4a92-bbcc-0e075c37a592",
+        "name": "/auth",
+        "containerId": "bca1951f-eeb8-4e1a-8151-3a3d577779fb",
+        "created": "2023-06-15T09:20:29.329Z",
+        "sortNum": 30000
+      }
+    ],
+    "settings": {
+      "options": {
+        "baseUrl": "http://127.0.0.1:8000"
+      }
+    }
+  }
+]

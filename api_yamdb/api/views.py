@@ -74,8 +74,8 @@ class UserViewSet(ModelViewSet):
     lookup_field = "username"
 
     @action(
-        detail=True,
-        methods=['get', 'patch'],
+        detail=False,
+        methods=['GET', 'PATCH'],
         permission_classes=[UserPermission]
     )
     def me(self, request):
