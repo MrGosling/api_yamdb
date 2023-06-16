@@ -69,21 +69,6 @@ class Title(BaseModel):
     )
 
 
-class TitleGenre(models.Model):
-    title = models.ForeignKey(
-        Title,
-        related_name='genres',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-    genre = models.ForeignKey(
-        Title,
-        related_name='titles',
-        on_delete=models.SET_NULL,
-        null=True,
-    )
-
-
 class Review(models.Model):
     """Модель отзывов на произведения, а так же их рейтинг"""
     author = models.ForeignKey(
