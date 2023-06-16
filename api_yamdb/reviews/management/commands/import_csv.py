@@ -155,4 +155,4 @@ class Command(BaseCommand):
                     except Genre.DoesNotExist as e:
                         raise ValueError(f'Жанр с id {genre_id} не найден: {e}')
         except FileNotFoundError:
-            print(f'Отсутствует файл genre_title.csv')
+            print('Отсутствует файл genre_title.csv')
