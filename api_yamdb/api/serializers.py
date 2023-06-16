@@ -9,9 +9,10 @@ import datetime as dt
 from reviews.models import Category, Genre, Title, Review
 from django.db.models import Avg
 from rest_framework.exceptions import MethodNotAllowed
-
+import re
 
 class TitleSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256)
     category = SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -28,10 +29,10 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
-        extra_kwargs = {
-            'name': {'required': True, 'max_length': 256},
-            'year': {'required': True},
-        }
+        # extra_kwargs = {
+        #     'name': {'required': True, 'max_length': 256},
+        #     'year': {'required': True},
+        # }
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -46,6 +47,11 @@ class TitleSerializer(serializers.ModelSerializer):
         score = ratings.aggregate(Avg('score'))['score__avg']
         return round(score, 2) if score else None
 
+    def validate_name(self, value):
+        if len(value) > 256:
+            raise serializers.ValidationError('name - не более 256 знаков!11')
+        return value
+
     def validate_year(self, value):
         if value > dt.datetime.now().year:
             raise serializers.ValidationError('Вы из будущего?')
@@ -56,6 +62,11 @@ class TitleSerializer(serializers.ModelSerializer):
             return super().update(instance, validated_data)
         else:
             raise MethodNotAllowed('PUT')
+    
+    def partial_update(self, instance, validated_data):
+        if 'name' in validated_data and len(validated_data['name']) > 256:
+            raise serializers.ValidationError({'name': 'Name field length should not exceed 256 characters'})
+        return super().partial_update(instance, validated_data)        
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -66,6 +77,14 @@ class CategorySerializer(serializers.ModelSerializer):
             'name': {'required': True, 'max_length': 256},
             'slug': {'required': True, 'max_length': 50},
         }
+    
+    def validate_slug(self, value):
+        pattern = r'^[-a-zA-Z0-9_]+$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError(
+                'Поле slug может содержать буквы латинского алфавита в верхнем'
+                'и нижнем регистре, цифры от 0-9,подчеркивание(_), дефис(-)')
+        return value
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -76,7 +95,14 @@ class GenreSerializer(serializers.ModelSerializer):
             'name': {'required': True, 'max_length': 256},
             'slug': {'required': True, 'max_length': 50},
         }
-
+    
+    def validate_slug(self, value):
+        pattern = r'^[-a-zA-Z0-9_]+$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError(
+                'Поле slug может содержать буквы латинского алфавита в верхнем'
+                'и нижнем регистре, цифры от 0-9,подчеркивание(_), дефис(-)')
+        return value
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов для произведений."""

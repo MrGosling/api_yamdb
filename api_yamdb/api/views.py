@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 
-from api.permissions import AdminPermission, UserPermission, CustomPermission
+from api.permissions import AdminPermission, UserPermission, CustomPermission, CategoriesGenresPermission, TitlesPermission
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from reviews.models import Category, Genre, Title, Review, Title, CustomUser
@@ -12,21 +12,24 @@ from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer, CommentSerializer,
                              ReviewSerializer, UserSerializer,
                              PartialUserSerializer)
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, TitlesPermission]
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, CategoriesGenresPermission]
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, CategoriesGenresPermission]
 
 
 class ReviewViewSet(viewsets.ModelViewSet):

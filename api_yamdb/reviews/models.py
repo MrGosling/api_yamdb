@@ -46,14 +46,17 @@ class CustomUser(AbstractUser):
 
 
 class Genre(BaseModel):
+    """Модель жанров."""
     slug = models.SlugField(max_length=50, unique=True)
 
 
 class Category(BaseModel):
+    """Модель категорий."""
     slug = models.SlugField(max_length=50, unique=True)
 
 
 class Title(BaseModel):
+    """Модель произведений и её привязка к жанрам и категориям."""
     year = models.IntegerField()
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(
