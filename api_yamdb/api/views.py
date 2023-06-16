@@ -1,22 +1,32 @@
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.serializers import ValidationError
+from rest_framework import status
 
 from api.permissions import AdminPermission, UserPermission
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from reviews.models import Category, Genre, Title, Review, Title, CustomUser
 from api.mixins import ListCreateDestroyViewSet
-from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer, CommentSerializer, ReviewSerializer, UserSerializer, PartialUserSerializer
+from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer, CommentSerializer, ReviewSerializer, UserSerializer, PartialUserSerializer, UserSignupSerializer, UserTokenSerializer
+from api.utils import confirm_code_send_mail, get_tokens_for_user
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import MethodNotAllowed
+from rest_framework import filters
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
 
+
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
@@ -71,22 +81,66 @@ class UserViewSet(ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AdminPermission]
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
     lookup_field = "username"
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
-        detail=True,
+        detail=False,
         methods=['get', 'patch'],
-        permission_classes=[UserPermission]
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         if request.method == 'GET':
             serializer = PartialUserSerializer(request.user)
-            return Response(serializer.data)
-
+            return Response(serializer.data, status=status.HTTP_200_OK)
         user = request.user
         serializer = PartialUserSerializer(
             user, data=request.data, partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AuthViewSet(ModelViewSet):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSignupSerializer
+    permission_classes = [AllowAny]
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny]
+    )
+    def signup(self, request):
+        serializer = UserSignupSerializer(data=request.data)
+        serializer.is_valid()
+        username = request.data['username']
+        email = request.data['email']
+        username, created = CustomUser.objects.get_or_create(
+            username=username, email=email
+        )
+        confirmation_code = default_token_generator.make_token(user=username)
+        confirm_code_send_mail(username, email, confirmation_code)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny]
+    )
+    def token(self, request):
+        serializer = UserTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = get_object_or_404(
+            CustomUser, username=request.data['username']
+        )
+        if default_token_generator.check_token(
+            user=username, token=request.data['confirmation_code']
+        ):
+            token_for_user = get_tokens_for_user(user=username)
+            return Response(token_for_user, status=status.HTTP_200_OK)
+        raise ValidationError('Переданы не корректные данные.')
