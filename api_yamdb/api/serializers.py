@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from reviews.models import Comment, Review
 from rest_framework.serializers import ModelSerializer, EmailField, CharField
-
+from django.core.exceptions import ValidationError
+import re
 from reviews.models import CustomUser
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -10,6 +11,8 @@ from reviews.models import Category, Genre, Title, Review
 from django.db.models import Avg
 from rest_framework.exceptions import MethodNotAllowed
 import re
+from rest_framework.validators import UniqueTogetherValidator
+
 
 class TitleSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=256)
@@ -144,20 +147,89 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    email = EmailField(required=True)
-    username = CharField(read_only=True)
+    # username = CharField(required=False, max_length=150)
+    # email = EmailField(required=True, max_length=254)
+    # first_name = CharField(required=False, max_length=150)
+    # last_name = CharField(required=False, max_length=150)
+    # bio = CharField(required=False)
+    # role = CharField(required=False)
 
     class Meta:
         model = CustomUser
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+        validators = [
+            UniqueTogetherValidator(
+                queryset=CustomUser.objects.all(),
+                fields=('username', 'email')
+            )
+        ]
+
+    def validate_role(self, value):
+        if value not in ['user', 'moderator', 'admin']:
+            raise ValidationError('Такой роли не существует.')
+        return value
 
 
 class PartialUserSerializer(ModelSerializer):
+    # username = CharField(required=False, max_length=150)
+    # email = EmailField(required=False, max_length=254)
+    # first_name = CharField(required=False, max_length=150)
+    # last_name = CharField(required=False, max_length=150)
+    # bio = CharField(required=False)
+    # role = CharField(read_only=True, required=False)
+
     class Meta:
         model = CustomUser
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-        read_only_fields = ('username', 'role', 'email')
+        read_only_fields = ('role',)
+
+    def validate_username(self, value):
+        pattern = (r'^[\w.@+-]+$')
+
+        if not re.match(pattern, value):
+            raise ValidationError('Username не соответствует паттерну.')
+        return value
+
+
+class UserSignupSerializer(ModelSerializer):
+    # username = CharField(
+    #     required=True,
+    #     max_length=150,
+    #     allow_blank=False,
+    #     allow_null=False
+    # )
+    # email = EmailField(
+    #     required=False,
+    #     max_length=254,
+    #     allow_blank=False,
+    #     allow_null=False
+    # )
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=CustomUser.objects.all(),
+                fields=('username', 'email')
+            )
+        ]
+
+    def validate(self, data):
+        if data['username'] == 'me':
+            raise ValidationError('Имя пользователя me запрещено!')
+        return data
+
+
+class UserTokenSerializer(ModelSerializer):
+    username = CharField(required=False)
+    confirmation_code = CharField(required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'confirmation_code')
+        read_only_fields = ('username',)

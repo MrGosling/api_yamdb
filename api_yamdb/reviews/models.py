@@ -12,29 +12,44 @@ class CustomUser(AbstractUser):
         ('admin', 'admin'),
     ]
 
-    bio = models.TextField(
-        'Биография',
-        null=True,
-        blank=True,
+    username = models.CharField(
+        max_length=150,
+        unique=True,
     )
     role = models.CharField(
         'Роль',
         max_length=10,
+        blank=False,
         choices=ROLE_TYPE,
         default='user',
     )
+    email = models.EmailField(
+        "Почта",
+        max_length=254,
+        unique=True
+    )
+    first_name = models.CharField(
+        "Имя",
+        max_length=150,
+        blank=True
+    )
+    last_name = models.CharField(
+        "Фамилия",
+        max_length=150,
+        blank=True
+    )
+    bio = models.TextField(
+        'Биография',
+        blank=True,
+    )
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username'],
-                name='unique_username'
-            ),
-            models.UniqueConstraint(
-                fields=['email'],
-                name='unique_email'
-            )
-        ]
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator' or self.is_superuser
 
     @property
     def is_admin(self):
