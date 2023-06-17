@@ -1,40 +1,60 @@
-from rest_framework.decorators import action, api_view
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.response import Response
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.serializers import ValidationError
-from rest_framework import status
-
-from api.permissions import AdminPermission, UserPermission, CustomPermission, CategoriesGenresPermission, TitlesPermission
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from reviews.models import Category, Genre, Title, Review, Title, CustomUser
-from api.mixins import ListCreateDestroyViewSet
-from api.serializers import (CategorySerializer, GenreSerializer,
-                             TitleSerializer, CommentSerializer,
-                             ReviewSerializer, UserSerializer,
-                             PartialUserSerializer, UserSignupSerializer, UserTokenSerializer)
-from api.utils import confirm_code_send_mail, get_tokens_for_user
 from django.contrib.auth.tokens import default_token_generator
-from rest_framework.pagination import PageNumberPagination
+from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status, viewsets
+from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework import filters
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
+from rest_framework.serializers import ValidationError
+from rest_framework.viewsets import ModelViewSet
+from reviews.models import Category, CustomUser, Genre, Review, Title
+
+from api.mixins import ListCreateDestroyViewSet
+from api.permissions import (AdminPermission,
+                             CustomPermission, TitlesGenresCategoriesPermission,
+                             UserPermission)
+from api.serializers import (CategorySerializer, CommentSerializer,
+                             GenreSerializer, PartialUserSerializer,
+                             ReviewSerializer, TitleSerializer, UserSerializer,
+                             UserSignupSerializer, UserTokenSerializer)
+from api.utils import confirm_code_send_mail, get_tokens_for_user
+
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        TitlesGenresCategoriesPermission
+    ]
+    pagination_class = PageNumberPagination
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        TitlesGenresCategoriesPermission
+    ]
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
+
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, CategoriesGenresPermission]
-
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        TitlesGenresCategoriesPermission
+    ]
+    filter_backends = (SearchFilter,)
+    search_fields = ('name',)
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Review."""

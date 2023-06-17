@@ -66,10 +66,10 @@ class TitleSerializer(serializers.ModelSerializer):
         else:
             raise MethodNotAllowed('PUT')
     
-    def partial_update(self, instance, validated_data):
-        if 'name' in validated_data and len(validated_data['name']) > 256:
-            raise serializers.ValidationError({'name': 'Name field length should not exceed 256 characters'})
-        return super().partial_update(instance, validated_data)        
+    # def partial_update(self, instance, validated_data):
+    #     if 'name' in validated_data and len(validated_data['name']) > 256:
+    #         raise serializers.ValidationError({'name': 'Name field length should not exceed 256 characters'})
+    #     return super().partial_update(instance, validated_data)        
 
 
 class CategorySerializer(serializers.ModelSerializer):
