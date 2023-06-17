@@ -22,39 +22,40 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              ReviewSerializer, TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
+from api.filters import TitleFilter
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().order_by('name')
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    filterset_class = TitleFilter
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
-    pagination_class = PageNumberPagination
+
 
 class GenreViewSet(ListCreateDestroyViewSet):
-    queryset = Genre.objects.all()
+    queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
     filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ['name']
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
-    queryset = Category.objects.all()
+    queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
     filter_backends = (SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ['name']
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Viewset для объектов модели Review."""
