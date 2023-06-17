@@ -1,6 +1,5 @@
 from django.core.management.base import BaseCommand
 from django.db import models
-import os
 import csv
 from reviews.models import Genre, Category, Title, CustomUser, Review, Comment
 
@@ -8,63 +7,29 @@ from reviews.models import Genre, Category, Title, CustomUser, Review, Comment
 class Command(BaseCommand):
     help = 'Загрузка данных из определённых csv файлов'
 
-    def can_open_file(self, path='static/data', filenames=['category.csv', 'comments.csv', 'genre.csv', 'genre_title.csv', 'review.csv', 'titles.csv', 'users.csv']):
-        """Проверяет возможность открытия файла.
-        in: category.csv
-        out: True/False"""
-        path = 'static/data/'
-        for file in filenames:
-            file = path + file
-            print(file)
-            try:
-                os.access(file, os.R_OK)
-            except Exception as e:
-                raise Exception(f'Проблемы с файлом {e}')
-
-
-    def get_file_names(self, path='static/data'):
-        """Получает список файлов из директории, возвращает 
-        только название файла, без расширения.
-        in: ['category.csv', 'comments.csv', 'genre.csv', 'genre_title.csv', 'review.csv', 'titles.csv', 'users.csv']
-        out: ['category', 'comments', 'genre', 'genre_title', 'review', 'titles', 'users']"""
-        files = os.listdir('static/data')
-        print(files)
-        self.can_open_file(files)
-        names = list()
-        while len(files) > 0:
-            name = files.pop(0).split('.')[0]
-            names.append(name)
-        print(names)
-        return names
-
     def import_genres(self):
-        """Создаёт экземпляр класса csv, принимает в него файл csv. Создаёт 
-        словарь с парами ключ - поля модели, в которую должна произойти загрузка;
-        значение - значене из файла, совпадающее с ключом. После словарь
-        передаётся именованными аргументами в модель, пытаясь получить существующее
-        значение в таблице либо создав новое."""
-        # try:
-        with open('static/data/genre.csv', 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            fields = Genre._meta.get_fields()
-            d = {}
-            # здесь проверить интерсекион в полях модели и названиях столбцов файла
-            # или подставить дефолтное ноне для неописанных полей
-            for field in fields[1:]:
-                d[field.name] = None
-            for row in reader:
-                rd = {}
-                for key, value in zip(d.keys(), row.values()):
-                    if isinstance(Genre._meta.get_field(key), models.ForeignKey):
-                        model = Genre.key.field.related_model.__name__
-                        rd[key] = model.objects.get(id=value)
-                    rd[key] = value
-                try:
-                    Genre.objects.get(**rd)
-                except Genre.DoesNotExist:
-                    Genre.objects.create(**rd)
-        # except FileNotFoundError:
-        #     print('Отсутствует файл genre.csv')
+        try:
+            with open('static/data/genre.csv', 'r', encoding='utf-8') as file:
+                reader = csv.DictReader(file)
+                fields = Genre._meta.get_fields()
+                d = {}
+                # здесь проверить интерсекион в полях модели и названиях столбцов файла
+                # или подставить дефолтное ноне для неописанных полей
+                for field in fields[1:]:
+                    d[field.name] = None
+                for row in reader:
+                    rd = {}
+                    for key, value in zip(d.keys(), row.values()):
+                        if isinstance(Genre._meta.get_field(key), models.ForeignKey):
+                            model = Genre.key.field.related_model.__name__
+                            rd[key] = model.objects.get(id=value)
+                        rd[key] = value
+                    try:
+                        Genre.objects.get(**rd)
+                    except Genre.DoesNotExist:
+                        Genre.objects.create(**rd)
+        except FileNotFoundError:
+            print('Отсутствует файл genre.csv')
     
     def import_categories(self):
         try:
@@ -86,38 +51,31 @@ class Command(BaseCommand):
             print('Отсутствует файл category.csv')
     
     def import_titles(self):
-        """Создаёт экземпляр класса csv, принимает в него файл csv. Создаёт 
-        словарь с парами ключ - поля модели, в которую должна произойти загрузка;
-        значение - значене из файла, совпадающее с ключом. После словарь
-        передаётся именованными аргументами в модель, пытаясь получить существующее
-        значение в таблице либо создав новое."""
-        # try:
-        with open('static/data/Titles.csv', 'r', encoding='utf-8') as file:
-            reader = csv.DictReader(file)
-            fields = Title._meta.get_fields()
-            print(reader.fieldnames)
-            d = {}
-            # здесь проверить интерсекцию в полях модели и названиях столбцов файла
-            # или подставить дефолтное None для неописанных полей
-            for field in fields[1:]:
-                d[field.name] = None
-            # print(d)
-            for row in reader:
-                # print(row)
-                rd = {}
-                for key, value in zip(d.keys(), row.values()):
-                    # print(key, value, rd)
-                    if isinstance(Title._meta.get_field(key), models.ForeignKey):
-                        # model = Title.key.field.related_model.__name__
-                        model = getattr(Title, key).related_model.__name__
-                        rd[key] = model.objects.get(id=value)
-                    rd[key] = row.get(key, None)
-                try:
-                    Title.objects.get(**rd)
-                except Title.DoesNotExist:
-                    Title.objects.create(**rd)
-        # except FileNotFoundError:
-        #     print('Отсутствует файл genre.csv')
+        try:
+            with open('static/data/titles.csv', 'r', encoding='utf-8') as file:
+                reader = csv.reader(file)
+                next(reader)
+                for row in reader:
+                    id = int(row[0])
+                    name = row[1]
+                    year = int(row[2])
+                    category = int(row[3])
+                    try:
+                        Title.objects.get(
+                            id=id,
+                            name=name,
+                            year=year,
+                            category=category
+                        )
+                    except Title.DoesNotExist:
+                        Title.objects.create(
+                            id=id,
+                            name=name,
+                            year=year,
+                            category=Category.objects.get(id=category)
+                        )
+        except FileNotFoundError:
+            print('Отсутствует файл titles.csv')
 
     def import_users(self):
         try:
@@ -219,7 +177,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         try:
-            self.get_file_names()
             self.import_genres()
             self.import_categories()
             self.import_titles()
