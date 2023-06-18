@@ -3,7 +3,7 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.serializers import ValidationError
-from rest_framework import status
+from rest_framework import status, filters
 
 from api.permissions import AdminPermission, UserPermission
 from django.shortcuts import get_object_or_404
@@ -14,8 +14,7 @@ from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
 from api.utils import confirm_code_send_mail, get_tokens_for_user
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import MethodNotAllowed
-from rest_framework import filters
+from rest_framework.exceptions import ValidationError, MethodNotAllowed
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -117,15 +116,61 @@ class AuthViewSet(ModelViewSet):
     )
     def signup(self, request):
         serializer = UserSignupSerializer(data=request.data)
-        serializer.is_valid()
-        username = request.data['username']
-        email = request.data['email']
-        username, created = CustomUser.objects.get_or_create(
+
+        if serializer.is_valid():
+            serializer.save()
+            username = serializer.validated_data.get('username')
+            email = serializer.validated_data.get('email')
+            user = CustomUser.objects.filter(
+                username=username
+            )
+            confirm_code = default_token_generator.make_token(
+                user=user.first()
+            )
+            confirm_code_send_mail(username, email, confirm_code)
+            return Response(serializer.data)
+
+
+        username = request.data.get('username')
+        email = request.data.get('email')
+
+
+        check_user_email = CustomUser.objects.filter(
             username=username, email=email
         )
-        confirmation_code = default_token_generator.make_token(user=username)
-        confirm_code_send_mail(username, email, confirmation_code)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if check_user_email.exists():
+            confirm_code = default_token_generator.make_token(
+                user=check_user_email.first()
+            )
+            confirm_code_send_mail(username, email, confirm_code)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        check_username = CustomUser.objects.filter(username=username)
+        check_email = CustomUser.objects.filter(email=email)
+        if check_username.exists() or check_email.exists():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+        # try:
+            
+        # except ValidationError:
+        #     raise ValidationError('Переданы не корректные данные.')
+        #return Response(request.data, status=status.HTTP_200_OK)
+        
+        #serializer.is_valid()
+        # username = serializer.data['username']
+        # email = serializer.data['email']
+        # check_user_email = CustomUser.objects.filter(
+        #     username=username, email=email
+        # )
+        # if check_user_email.exists():
+        #     return Response(request.data, status=status.HTTP_200_OK)
+        #     return Response(request.data)
+        # #serializer.save()
+        # return Response(request.data)
+        # # username, created = CustomUser.objects.get_or_create(
+        # #     username=username, email=email
+        # # )
+
 
     @action(
         detail=False,

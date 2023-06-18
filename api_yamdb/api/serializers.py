@@ -143,6 +143,13 @@ class UserSerializer(ModelSerializer):
             raise ValidationError('Такой роли не существует.')
         return value
 
+    def validate_username(self, value):
+        pattern = (r'^[\w.@+-]+$')
+
+        if not re.match(pattern, value):
+            raise ValidationError('Username не соответствует паттерну.')
+        return value
+
 
 class PartialUserSerializer(ModelSerializer):
     # username = CharField(required=False, max_length=150)
@@ -171,14 +178,10 @@ class UserSignupSerializer(ModelSerializer):
     # username = CharField(
     #     required=True,
     #     max_length=150,
-    #     allow_blank=False,
-    #     allow_null=False
     # )
     # email = EmailField(
-    #     required=False,
+    #     required=True,
     #     max_length=254,
-    #     allow_blank=False,
-    #     allow_null=False
     # )
 
     class Meta:
@@ -195,6 +198,13 @@ class UserSignupSerializer(ModelSerializer):
         if data['username'] == 'me':
             raise ValidationError('Имя пользователя me запрещено!')
         return data
+
+    def validate_username(self, value):
+        pattern = (r'^[\w.@+-]+$')
+
+        if not re.match(pattern, value):
+            raise ValidationError('Username не соответствует паттерну.')
+        return value
 
 
 class UserTokenSerializer(ModelSerializer):

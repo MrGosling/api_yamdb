@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
     username = models.CharField(
         max_length=150,
         unique=True,
+        blank=False,
     )
     role = models.CharField(
         'Роль',
@@ -24,19 +25,19 @@ class CustomUser(AbstractUser):
         default='user',
     )
     email = models.EmailField(
-        "Почта",
         max_length=254,
-        unique=True
+        unique=True,
+        blank=False,
     )
     first_name = models.CharField(
         "Имя",
         max_length=150,
-        blank=True
+        blank=True,
     )
     last_name = models.CharField(
         "Фамилия",
         max_length=150,
-        blank=True
+        blank=True,
     )
     bio = models.TextField(
         'Биография',
