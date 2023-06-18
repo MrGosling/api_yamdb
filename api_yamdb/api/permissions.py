@@ -3,9 +3,12 @@ from rest_framework import permissions
 
 class AdminPermission(permissions.BasePermission):
     def has_permission(self, request, view):
-        return (
-            request.user.is_staff or request.user.is_superuser
-        )
+        if request.user.is_authenticated:
+            return (
+                request.user.is_staff
+                or request.user.is_superuser
+                or request.user.is_admin
+            )
 
 
 class UserPermission(permissions.BasePermission):

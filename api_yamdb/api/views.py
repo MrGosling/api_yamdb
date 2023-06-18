@@ -2,8 +2,11 @@ from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.serializers import ValidationError
+from rest_framework import status, filters
 
-from api.permissions import AdminPermission, UserPermission, CustomPermission
+from api.permissions import AdminPermission, CustomPermission
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from reviews.models import Category, Genre, Title, Review, Title, CustomUser
@@ -11,7 +14,12 @@ from api.mixins import ListCreateDestroyViewSet
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer, CommentSerializer,
                              ReviewSerializer, UserSerializer,
-                             PartialUserSerializer)
+                             PartialUserSerializer, UserSignupSerializer, UserTokenSerializer)
+from api.utils import confirm_code_send_mail, get_tokens_for_user
+from django.contrib.auth.tokens import default_token_generator
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import ValidationError
+from django.db.utils import IntegrityError
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -19,9 +27,11 @@ class TitleViewSet(viewsets.ModelViewSet):
     serializer_class = TitleSerializer
 
 
+
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
@@ -78,25 +88,80 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(ModelViewSet):
+    """Вьюсет для управления данными пользователей."""
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AdminPermission]
+    pagination_class = PageNumberPagination
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
     lookup_field = "username"
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         detail=False,
         methods=['get', 'patch'],
-        permission_classes=[UserPermission]
+        permission_classes=[IsAuthenticated]
     )
     def me(self, request):
         if request.method == 'GET':
             serializer = PartialUserSerializer(request.user)
-            return Response(serializer.data)
-
+            return Response(serializer.data, status=status.HTTP_200_OK)
         user = request.user
         serializer = PartialUserSerializer(
             user, data=request.data, partial=True
         )
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class AuthViewSet(ModelViewSet):
+    """Вьюсет для регистрации и авторизации пользователей."""
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSignupSerializer
+    permission_classes = [AllowAny]
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny]
+    )
+    def signup(self, request):
+        serializer = UserSignupSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = request.data.get('username')
+        email = request.data.get('email')
+
+        try:
+            user, created = CustomUser.objects.get_or_create(
+                username=username,
+                email=email,
+            )
+        except IntegrityError:
+            return Response(
+                "Пользователь с таким именем или почтой уже существует.",
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        confirm_code = default_token_generator.make_token(user)
+        confirm_code_send_mail(username, email, confirm_code)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False,
+        methods=['post'],
+        permission_classes=[AllowAny]
+    )
+    def token(self, request):
+        serializer = UserTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        username = get_object_or_404(
+            CustomUser, username=request.data['username']
+        )
+        if default_token_generator.check_token(
+            user=username, token=request.data['confirmation_code']
+        ):
+            token_for_user = get_tokens_for_user(user=username)
+            return Response(token_for_user, status=status.HTTP_200_OK)
+        raise ValidationError('Переданы не корректные данные.')
