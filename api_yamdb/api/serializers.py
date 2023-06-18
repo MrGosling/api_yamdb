@@ -11,7 +11,7 @@ from reviews.models import Category, Genre, Title, Review
 from django.db.models import Avg
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.validators import UniqueTogetherValidator
-
+from api_yamdb.settings import PATTERN
 
 class TitleSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(
@@ -138,9 +138,7 @@ class UserSerializer(ModelSerializer):
         return value
 
     def validate_username(self, value):
-        pattern = (r'^[\w.@+-]+$')
-
-        if not re.match(pattern, value):
+        if not re.match(PATTERN, value):
             raise ValidationError('Username не соответствует паттерну.')
         return value
 
@@ -155,9 +153,7 @@ class PartialUserSerializer(ModelSerializer):
         read_only_fields = ('role',)
 
     def validate_username(self, value):
-        pattern = (r'^[\w.@+-]+$')
-
-        if not re.match(pattern, value):
+        if not re.match(PATTERN, value):
             raise ValidationError('Username не соответствует паттерну.')
         return value
 
@@ -177,9 +173,7 @@ class UserSignupSerializer(Serializer):
         return data
 
     def validate_username(self, value):
-        pattern = (r'^[\w.@+-]+$')
-
-        if not re.match(pattern, value):
+        if not re.match(PATTERN, value):
             raise ValidationError('Username не соответствует паттерну.')
         return value
 
