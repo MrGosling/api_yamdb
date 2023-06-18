@@ -1,11 +1,11 @@
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.serializers import ValidationError
 from rest_framework import status, filters
 
-from api.permissions import AdminPermission, UserPermission
+from api.permissions import AdminPermission
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from reviews.models import Category, Genre, Title, Review, Title, CustomUser
@@ -14,7 +14,7 @@ from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
 from api.utils import confirm_code_send_mail, get_tokens_for_user
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
 
@@ -126,45 +126,15 @@ class AuthViewSet(ModelViewSet):
                 username=username,
                 email=email,
             )
-
         except IntegrityError:
             return Response(
                 "Пользователь с таким именем или почтой уже существует.",
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        #if created:
-        confirm_code = default_token_generator.make_token(
-            user=user
-        )
+        confirm_code = default_token_generator.make_token(user)
         confirm_code_send_mail(username, email, confirm_code)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-        # if serializer.is_valid(raise_exception=True):
-        #     serializer.save()
-        #     username = serializer.validated_data.get('username')
-        #     email = serializer.validated_data.get('email')
-        #     user = CustomUser.objects.filter(
-        #         username=username
-        #     )
-
-        # username = request.data.get('username')
-        # email = request.data.get('email')
-
-        # check_user_email = CustomUser.objects.filter(
-        #     username=username, email=email
-        # )
-        # if check_user_email.exists():
-        #     confirm_code = default_token_generator.make_token(
-        #         user=check_user_email.first()
-        #     )
-        #     confirm_code_send_mail(username, email, confirm_code)
-        #     return Response(serializer.data, status=status.HTTP_200_OK)
-        # check_username = CustomUser.objects.filter(username=username)
-        # check_email = CustomUser.objects.filter(email=email)
-        # if check_username.exists() or check_email.exists():
-        #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     @action(
         detail=False,

@@ -5,7 +5,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 def confirm_code_send_mail(username, email, confirmation_code):
     send_mail(
         'Регистрация',
-        f'Здравствуйте, {username}, ваш код подтверждения: {confirmation_code}.',
+        (
+            f'Здравствуйте, {username}, '
+            f'ваш код подтверждения: {confirmation_code}.'
+        ),
         'from@example.com',
         [email],
         fail_silently=False,

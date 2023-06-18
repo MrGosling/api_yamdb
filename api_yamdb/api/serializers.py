@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from reviews.models import Comment, Review
-from rest_framework.serializers import ModelSerializer, EmailField, CharField
+from rest_framework.serializers import ModelSerializer, CharField, Serializer
 from django.core.exceptions import ValidationError
 import re
 from reviews.models import CustomUser
@@ -119,13 +119,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
-    # username = CharField(required=False, max_length=150)
-    # email = EmailField(required=True, max_length=254)
-    # first_name = CharField(required=False, max_length=150)
-    # last_name = CharField(required=False, max_length=150)
-    # bio = CharField(required=False)
-    # role = CharField(required=False)
-
     class Meta:
         model = CustomUser
         fields = (
@@ -152,13 +145,6 @@ class UserSerializer(ModelSerializer):
 
 
 class PartialUserSerializer(ModelSerializer):
-    # username = CharField(required=False, max_length=150)
-    # email = EmailField(required=False, max_length=254)
-    # first_name = CharField(required=False, max_length=150)
-    # last_name = CharField(required=False, max_length=150)
-    # bio = CharField(required=False)
-    # role = CharField(read_only=True, required=False)
-
     class Meta:
         model = CustomUser
         fields = (
@@ -174,16 +160,13 @@ class PartialUserSerializer(ModelSerializer):
         return value
 
 
-class UserSignupSerializer(ModelSerializer):
+class UserSignupSerializer(Serializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.CharField(max_length=150, required=True)
+
     class Meta:
         model = CustomUser
         fields = ('email', 'username')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=CustomUser.objects.all(),
-                fields=('username', 'email')
-            )
-        ]
 
     def validate(self, data):
         if data['username'] == 'me':
@@ -199,8 +182,8 @@ class UserSignupSerializer(ModelSerializer):
 
 
 class UserTokenSerializer(ModelSerializer):
-    username = CharField(required=False)
-    confirmation_code = CharField(required=False)
+    username = CharField(required=True)
+    confirmation_code = CharField(required=True)
 
     class Meta:
         model = CustomUser
