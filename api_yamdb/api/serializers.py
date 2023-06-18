@@ -175,15 +175,6 @@ class PartialUserSerializer(ModelSerializer):
 
 
 class UserSignupSerializer(ModelSerializer):
-    # username = CharField(
-    #     required=True,
-    #     max_length=150,
-    # )
-    # email = EmailField(
-    #     required=True,
-    #     max_length=254,
-    # )
-
     class Meta:
         model = CustomUser
         fields = ('email', 'username')
