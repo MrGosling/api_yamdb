@@ -1,9 +1,10 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, status, viewsets
-from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import MethodNotAllowed
+from rest_framework import filters, status
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
@@ -13,27 +14,19 @@ from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
-from api.permissions import AdminPermission, CustomPermission
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from reviews.models import Category, Genre, Title, Review, Title, CustomUser
+from api.filters import TitleFilter
 from api.mixins import ListCreateDestroyViewSet
-from api.permissions import (AdminPermission,
-                             CustomPermission, TitlesGenresCategoriesPermission,
-                             UserPermission)
+from api.permissions import (AdminPermission, CustomPermission,
+                             TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, PartialUserSerializer,
                              ReviewSerializer, TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.exceptions import ValidationError
-from django.db.utils import IntegrityError
-from api.filters import TitleFilter
 
 
-class TitleViewSet(viewsets.ModelViewSet):
+class TitleViewSet(ModelViewSet):
+    """Viewset для объектов модели Title."""
     queryset = Title.objects.all().order_by('name')
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
@@ -45,6 +38,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
+    """Viewset для объектов модели Genre."""
     queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
     permission_classes = [
@@ -56,6 +50,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
+    """Viewset для объектов модели Category."""
     queryset = Category.objects.all().order_by('name')
     serializer_class = CategorySerializer
     permission_classes = [
@@ -65,7 +60,8 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ['name']
 
-class ReviewViewSet(viewsets.ModelViewSet):
+
+class ReviewViewSet(ModelViewSet):
     """Viewset для объектов модели Review."""
     serializer_class = ReviewSerializer
     permission_classes = [CustomPermission]
@@ -89,7 +85,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
 
 
-class CommentViewSet(viewsets.ModelViewSet):
+class CommentViewSet(ModelViewSet):
     """Вьюсет для обьектов модели Comment."""
     serializer_class = CommentSerializer
     permission_classes = [CustomPermission]

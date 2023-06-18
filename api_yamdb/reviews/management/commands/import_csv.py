@@ -1,7 +1,9 @@
+import csv
+
 from django.core.management.base import BaseCommand
 from django.db import models
-import csv
-from reviews.models import Genre, Category, Title, CustomUser, Review, Comment
+
+from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
 
 class Command(BaseCommand):
@@ -13,14 +15,17 @@ class Command(BaseCommand):
                 reader = csv.DictReader(file)
                 fields = Genre._meta.get_fields()
                 d = {}
-                # здесь проверить интерсекион в полях модели и названиях столбцов файла
+                # здесь проверить интерсекион в полях модели и названиях
+                # столбцов файла
                 # или подставить дефолтное ноне для неописанных полей
                 for field in fields[1:]:
                     d[field.name] = None
                 for row in reader:
                     rd = {}
                     for key, value in zip(d.keys(), row.values()):
-                        if isinstance(Genre._meta.get_field(key), models.ForeignKey):
+                        if isinstance(
+                            Genre._meta.get_field(key), models.ForeignKey
+                        ):
                             model = Genre.key.field.related_model.__name__
                             rd[key] = model.objects.get(id=value)
                         rd[key] = value
@@ -30,10 +35,12 @@ class Command(BaseCommand):
                         Genre.objects.create(**rd)
         except FileNotFoundError:
             print('Отсутствует файл genre.csv')
-    
+
     def import_categories(self):
         try:
-            with open('static/data/category.csv', 'r', encoding='utf-8') as file:
+            with open(
+                'static/data/category.csv', 'r', encoding='utf-8'
+            ) as file:
                 reader = csv.DictReader(file)
                 fields = Category._meta.get_fields()
                 d = {}
@@ -49,7 +56,7 @@ class Command(BaseCommand):
                         Category.objects.create(**rd)
         except FileNotFoundError:
             print('Отсутствует файл category.csv')
-    
+
     def import_titles(self):
         try:
             with open('static/data/titles.csv', 'r', encoding='utf-8') as file:
@@ -133,7 +140,9 @@ class Command(BaseCommand):
 
     def import_comments(self):
         try:
-            with open('static/data/comments.csv', 'r', encoding='utf-8') as file:
+            with open(
+                'static/data/comments.csv', 'r', encoding='utf-8'
+            ) as file:
                 reader = csv.reader(file)
                 next(reader)
                 for row in reader:
@@ -157,7 +166,9 @@ class Command(BaseCommand):
 
     def import_title_genres(self):
         try:
-            with open('static/data/genre_title.csv', 'r', encoding='utf-8') as file:
+            with open(
+                'static/data/genre_title.csv', 'r', encoding='utf-8'
+            ) as file:
                 reader = csv.reader(file)
                 next(reader)
                 for row in reader:
@@ -169,9 +180,13 @@ class Command(BaseCommand):
                         if genre not in title.genre.all():
                             title.genre.add(genre)
                     except Title.DoesNotExist as e:
-                        raise ValueError(f'Произведение с id {title_id} не найдено: {e}')
+                        raise ValueError(
+                            f'Произведение с id {title_id} не найдено: {e}'
+                        )
                     except Genre.DoesNotExist as e:
-                        raise ValueError(f'Жанр с id {genre_id} не найден: {e}')
+                        raise ValueError(
+                            f'Жанр с id {genre_id} не найден: {e}'
+                        )
         except FileNotFoundError:
             print('Отсутствует файл genre_title.csv')
 

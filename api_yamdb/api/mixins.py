@@ -7,4 +7,5 @@ class ListCreateDestroyViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Миксин для вюсетов моделей Category, Genre."""
     lookup_field = 'slug'

@@ -1,7 +1,8 @@
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.urls import include, path
 from rest_framework import routers
-from api.views import TitleViewSet, GenreViewSet, CategoryViewSet, ReviewViewSet, CommentViewSet, UserViewSet, AuthViewSet
+
+from api.views import (AuthViewSet, CategoryViewSet, CommentViewSet,
+                       GenreViewSet, ReviewViewSet, TitleViewSet, UserViewSet)
 
 app_name = 'api'
 

@@ -1,20 +1,19 @@
-from rest_framework import serializers
-from reviews.models import Comment, Review
-from rest_framework.serializers import ModelSerializer, CharField, Serializer
-from django.core.exceptions import ValidationError
-import re
-from reviews.models import CustomUser
-from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 import datetime as dt
-from reviews.models import Category, Genre, Title, Review
-from django.db.models import Avg
-from rest_framework.exceptions import MethodNotAllowed
 import re
-from rest_framework.validators import UniqueTogetherValidator
+
 from api_yamdb.settings import PATTERN
+from django.core.exceptions import ValidationError
+from django.db.models import Avg
+from rest_framework import serializers
+from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.relations import SlugRelatedField
+from rest_framework.serializers import CharField, ModelSerializer, Serializer
+from rest_framework.validators import UniqueTogetherValidator
+from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
+
 
 class TitleSerializer(serializers.ModelSerializer):
+    """Сериализатор произведений."""
     name = serializers.CharField(max_length=256)
     category = SlugRelatedField(
         queryset=Category.objects.all(),
@@ -32,12 +31,10 @@ class TitleSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Title
-        # extra_kwargs = {
-        #     'name': {'required': True, 'max_length': 256},
-        #     'year': {'required': True},
-        # }
 
     def to_representation(self, instance):
+        """Переопределённая функция, изменяющая представления жанров и моделей
+        при GET запросе."""
         data = super().to_representation(instance)
         genres_data = GenreSerializer(instance.genre.all(), many=True).data
         category_data = CategorySerializer(instance.category).data
@@ -46,33 +43,33 @@ class TitleSerializer(serializers.ModelSerializer):
         return data
 
     def get_rating(self, obj):
+        """Функция для вычисляемого поля rating."""
         ratings = Review.objects.filter(title__id=obj.id)
         score = ratings.aggregate(Avg('score'))['score__avg']
         return round(score, 2) if score else None
 
     def validate_name(self, value):
+        """Валидация имени - не более 256 знаков."""
         if len(value) > 256:
             raise serializers.ValidationError('name - не более 256 знаков!11')
         return value
 
     def validate_year(self, value):
+        """Валидация года выпуска - год не позже нынешнего."""
         if value > dt.datetime.now().year:
             raise serializers.ValidationError('Вы из будущего?')
         return value
 
     def update(self, instance, validated_data):
+        """Запрет метода PUT."""
         if self.partial:
             return super().update(instance, validated_data)
         else:
             raise MethodNotAllowed('PUT')
-    
-    # def partial_update(self, instance, validated_data):
-    #     if 'name' in validated_data and len(validated_data['name']) > 256:
-    #         raise serializers.ValidationError({'name': 'Name field length should not exceed 256 characters'})
-    #     return super().partial_update(instance, validated_data)        
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    """Сериализатор категорий."""
     class Meta:
         fields = ('name', 'slug',)
         model = Category
@@ -80,8 +77,9 @@ class CategorySerializer(serializers.ModelSerializer):
             'name': {'required': True, 'max_length': 256},
             'slug': {'required': True, 'max_length': 50},
         }
-    
+
     def validate_slug(self, value):
+        """Валидация поля slug на соответствие паттерну."""
         pattern = r'^[-a-zA-Z0-9_]+$'
         if not re.match(pattern, value):
             raise serializers.ValidationError(
@@ -91,6 +89,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    """Сериализатор жанров."""
     class Meta:
         fields = ('name', 'slug',)
         model = Genre
@@ -98,14 +97,16 @@ class GenreSerializer(serializers.ModelSerializer):
             'name': {'required': True, 'max_length': 256},
             'slug': {'required': True, 'max_length': 50},
         }
-    
+
     def validate_slug(self, value):
+        """Валидация поля slug на соответствие паттерну."""
         pattern = r'^[-a-zA-Z0-9_]+$'
         if not re.match(pattern, value):
             raise serializers.ValidationError(
                 'Поле slug может содержать буквы латинского алфавита в верхнем'
                 'и нижнем регистре, цифры от 0-9,подчеркивание(_), дефис(-)')
         return value
+
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор отзывов для произведений."""
