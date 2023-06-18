@@ -36,13 +36,23 @@ from api.filters import TitleFilter
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().order_by('name')
     serializer_class = TitleSerializer
-
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        TitlesGenresCategoriesPermission
+    ]
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all().order_by('name')
     serializer_class = GenreSerializer
-
+    permission_classes = [
+        IsAuthenticatedOrReadOnly,
+        TitlesGenresCategoriesPermission
+    ]
+    filter_backends = (SearchFilter,)
+    search_fields = ['name']
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
