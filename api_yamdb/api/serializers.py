@@ -119,6 +119,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(ModelSerializer):
+    """Сериализатор для данных о пользователе."""
     class Meta:
         model = CustomUser
         fields = (
@@ -145,6 +146,7 @@ class UserSerializer(ModelSerializer):
 
 
 class PartialUserSerializer(ModelSerializer):
+    """Сериализатор для управления данными пользователя."""
     class Meta:
         model = CustomUser
         fields = (
@@ -161,6 +163,7 @@ class PartialUserSerializer(ModelSerializer):
 
 
 class UserSignupSerializer(Serializer):
+    """Сериализатор для регистрации пользователей."""
     email = serializers.EmailField(max_length=254, required=True)
     username = serializers.CharField(max_length=150, required=True)
 
@@ -182,6 +185,7 @@ class UserSignupSerializer(Serializer):
 
 
 class UserTokenSerializer(ModelSerializer):
+    """Сериализатор для получения токена."""
     username = CharField(required=True)
     confirmation_code = CharField(required=True)
 

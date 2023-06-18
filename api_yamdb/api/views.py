@@ -78,6 +78,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 class UserViewSet(ModelViewSet):
+    """Вьюсет для управления данными пользователей."""
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [AdminPermission]
@@ -106,6 +107,7 @@ class UserViewSet(ModelViewSet):
 
 
 class AuthViewSet(ModelViewSet):
+    """Вьюсет для регистрации и авторизации пользователей."""
     queryset = CustomUser.objects.all()
     serializer_class = UserSignupSerializer
     permission_classes = [AllowAny]

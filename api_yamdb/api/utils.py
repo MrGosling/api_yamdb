@@ -3,6 +3,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 def confirm_code_send_mail(username, email, confirmation_code):
+    """Отправка письма с кодом подтверждения."""
     send_mail(
         'Регистрация',
         (
@@ -16,6 +17,7 @@ def confirm_code_send_mail(username, email, confirmation_code):
 
 
 def get_tokens_for_user(user):
+    """Получение токена для авторизации."""
     refresh = RefreshToken.for_user(user)
 
     return {
