@@ -130,10 +130,8 @@ class AuthViewSet(ModelViewSet):
             confirm_code_send_mail(username, email, confirm_code)
             return Response(serializer.data)
 
-
         username = request.data.get('username')
         email = request.data.get('email')
-
 
         check_user_email = CustomUser.objects.filter(
             username=username, email=email
@@ -151,9 +149,13 @@ class AuthViewSet(ModelViewSet):
 
 
         # try:
-            
+        #     username = request.data.get('username')
+        #     email = request.data.get('email')
+
         # except ValidationError:
         #     raise ValidationError('Переданы не корректные данные.')
+
+
         #return Response(request.data, status=status.HTTP_200_OK)
         
         #serializer.is_valid()

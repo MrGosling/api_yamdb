@@ -186,7 +186,7 @@ class UserSignupSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email')
+        fields = ('email', 'username')
         validators = [
             UniqueTogetherValidator(
                 queryset=CustomUser.objects.all(),
