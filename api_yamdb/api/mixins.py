@@ -1,5 +1,4 @@
-from rest_framework import mixins
-from rest_framework import filters, permissions, viewsets
+from rest_framework import mixins, viewsets
 
 
 class ListCreateDestroyViewSet(
@@ -8,4 +7,5 @@ class ListCreateDestroyViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
+    """Миксин для вюсетов моделей Category, Genre."""
     lookup_field = 'slug'

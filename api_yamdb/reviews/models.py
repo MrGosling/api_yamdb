@@ -1,6 +1,7 @@
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from reviews.base_models import BaseModel
 
 
@@ -52,27 +53,32 @@ class CustomUser(AbstractUser):
     def is_moderator(self):
         return self.role == 'moderator' or self.is_superuser
 
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator' or self.is_superuser
+
 
 class Genre(BaseModel):
+    """Модель жанров."""
     slug = models.SlugField(max_length=50, unique=True)
 
 
 class Category(BaseModel):
+    """Модель категорий."""
     slug = models.SlugField(max_length=50, unique=True)
 
 
 class Title(BaseModel):
+    """Модель произведений и её привязка к жанрам и категориям."""
     year = models.IntegerField()
-    # rating = models.IntegerField()
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(
         Genre,
-        # blank=True,
-        # null=True,
         related_name='titles',
-        # through='TitleGenre',
-        # through_fields=('title', 'genre'),
-        # on_delete=models.SET_NULL,
     )
     category = models.ForeignKey(
         Category,
@@ -114,9 +120,17 @@ class Review(models.Model):
     )
 
     def __str__(self):
-        return f"{self.id}"
+        return self.text
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['title', 'author'],
+                name='unique_title_author'
+            )
+        ]
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
         ordering = ['-pub_date']
 
 
