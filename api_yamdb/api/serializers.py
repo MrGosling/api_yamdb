@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from reviews.models import Comment, Review
 from rest_framework.serializers import ModelSerializer, CharField, Serializer
-from django.core.exceptions import ValidationError
-import re
 from reviews.models import CustomUser
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -11,7 +9,8 @@ from reviews.models import Category, Genre, Title, Review
 from django.db.models import Avg
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.validators import UniqueTogetherValidator
-from api_yamdb.settings import PATTERN
+from api.validators import validate_username_pattern, validate_username_not_me, validate_role
+
 
 class TitleSerializer(serializers.ModelSerializer):
     category = SlugRelatedField(
@@ -133,14 +132,10 @@ class UserSerializer(ModelSerializer):
         ]
 
     def validate_role(self, value):
-        if value not in ['user', 'moderator', 'admin']:
-            raise ValidationError('Такой роли не существует.')
-        return value
+        return validate_role(value)
 
     def validate_username(self, value):
-        if not re.match(PATTERN, value):
-            raise ValidationError('Username не соответствует паттерну.')
-        return value
+        return validate_username_pattern(value)
 
 
 class PartialUserSerializer(ModelSerializer):
@@ -153,9 +148,7 @@ class PartialUserSerializer(ModelSerializer):
         read_only_fields = ('role',)
 
     def validate_username(self, value):
-        if not re.match(PATTERN, value):
-            raise ValidationError('Username не соответствует паттерну.')
-        return value
+        return validate_username_pattern(value)
 
 
 class UserSignupSerializer(Serializer):
@@ -167,15 +160,11 @@ class UserSignupSerializer(Serializer):
         model = CustomUser
         fields = ('email', 'username')
 
-    def validate(self, data):
-        if data['username'] == 'me':
-            raise ValidationError('Имя пользователя me запрещено!')
-        return data
+    def validate(self, value):
+        return validate_username_not_me(value)
 
     def validate_username(self, value):
-        if not re.match(PATTERN, value):
-            raise ValidationError('Username не соответствует паттерну.')
-        return value
+        return validate_username_pattern(value)
 
 
 class UserTokenSerializer(ModelSerializer):
