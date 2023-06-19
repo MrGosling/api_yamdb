@@ -163,7 +163,7 @@ class AuthViewSet(ModelViewSet):
         except IntegrityError:
             return Response(
                 "Пользователь с таким именем или почтой уже существует.",
-                status=status.HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         confirm_code = default_token_generator.make_token(user)
