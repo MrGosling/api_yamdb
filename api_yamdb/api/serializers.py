@@ -1,12 +1,15 @@
-import datetime as dt
-import re
-from api.validators import validate_username_pattern, validate_username_not_me, validate_role
 from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import CharField, ModelSerializer, Serializer
 from rest_framework.validators import UniqueTogetherValidator
+import datetime as dt
+import re
+
+from api.validators import (validate_username_pattern,
+                            validate_username_not_me,
+                            validate_role)
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
 
