@@ -12,7 +12,7 @@ class CustomUserAdmin(admin.ModelAdmin):
         'last_name',
         'bio',
     )
-    search_fields = ('slug',)
+    search_fields = ('username',)
     empty_value_display = '-пусто-'
 
 
