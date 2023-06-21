@@ -43,9 +43,10 @@ class TitleViewSet(ModelViewSet):
         return self.pagination_class()
 
     def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.annotate(rating=Avg('reviews__score'))
-        queryset = queryset.order_by('name')
+        queryset = (
+            super().get_queryset().annotate
+            (rating=Avg('reviews__score')).order_by('name')
+        )
         return queryset
 
     def list(self, request):
