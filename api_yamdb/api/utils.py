@@ -1,6 +1,8 @@
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api_yamdb.settings import FROM_EMAIL
+
 
 def confirm_code_send_mail(username, email, confirmation_code):
     """Отправка письма с кодом подтверждения."""
@@ -10,7 +12,7 @@ def confirm_code_send_mail(username, email, confirmation_code):
             f'Здравствуйте, {username}, '
             f'ваш код подтверждения: {confirmation_code}.'
         ),
-        'from@example.com',
+        FROM_EMAIL,
         [email],
         fail_silently=False,
     )

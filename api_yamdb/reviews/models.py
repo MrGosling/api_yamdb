@@ -1,29 +1,29 @@
+import datetime as dt
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from api_yamdb.settings import ROLE_TYPE
+from api.validators import validate_username_pattern
 from reviews.base_models import BaseModel
 
 
 class CustomUser(AbstractUser):
     """Кастомная модель пользователей"""
-    ROLE_TYPE = [
-        ('user', 'user'),
-        ('moderator', 'moderator'),
-        ('admin', 'admin'),
-    ]
-
     username = models.CharField(
         max_length=150,
         unique=True,
         blank=False,
+        validators=[
+            validate_username_pattern,
+        ],
     )
     role = models.CharField(
         'Роль',
         max_length=10,
         blank=False,
         choices=ROLE_TYPE,
-        default='user',
+        default=ROLE_TYPE[0][1],
     )
     email = models.EmailField(
         max_length=254,
@@ -47,11 +47,11 @@ class CustomUser(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == 'admin' or self.is_superuser
+        return self.role == ROLE_TYPE[2][1] or self.is_superuser
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator' or self.is_superuser
+        return self.role == ROLE_TYPE[1][1] or self.is_superuser
 
 
 class Genre(BaseModel):
@@ -66,7 +66,10 @@ class Category(BaseModel):
 
 class Title(BaseModel):
     """Модель произведений и её привязка к жанрам и категориям."""
-    year = models.IntegerField()
+    year = models.IntegerField(
+        validators=[MaxValueValidator(dt.date.today().year)],
+        db_index=True,
+    )
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(
         Genre,

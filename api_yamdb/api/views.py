@@ -1,5 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.db.utils import IntegrityError
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
@@ -15,19 +15,21 @@ from rest_framework.viewsets import ModelViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 from api.filters import TitleFilter
-from api.mixins import ListCreateDestroyViewSet
+from api.mixins import (ListCreateDestroyViewSet,
+                        RetrieveListUpdateCreateDestroyViewSet)
 from api.permissions import (AdminPermission, CustomPermission,
                              TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, PartialUserSerializer,
-                             ReviewSerializer, TitleSerializer, UserSerializer,
+                             ReviewSerializer, TitleReadOnlySerializer,
+                             TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
 
 
 class TitleViewSet(ModelViewSet):
     """Viewset для объектов модели Title."""
-    queryset = Title.objects.all().order_by('name')
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -35,6 +37,30 @@ class TitleViewSet(ModelViewSet):
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
+    pagination_class = PageNumberPagination
+
+    def get_pagination_class(self):
+        return self.pagination_class()
+
+    def get_queryset(self):
+        queryset = (
+            super().get_queryset().annotate
+            (rating=Avg('reviews__score')).order_by('name')
+        )
+        return queryset
+
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        paginator = self.get_pagination_class()
+        data = paginator.paginate_queryset(queryset, request)
+        serializer = TitleReadOnlySerializer(data, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
+        serializer = TitleReadOnlySerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
@@ -109,7 +135,7 @@ class CommentViewSet(ModelViewSet):
         )
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(RetrieveListUpdateCreateDestroyViewSet):
     """Вьюсет для управления данными пользователей."""
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
@@ -118,7 +144,11 @@ class UserViewSet(ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = "username"
-    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
     @action(
         detail=False,
@@ -160,7 +190,7 @@ class AuthViewSet(ModelViewSet):
                 username=username,
                 email=email,
             )
-        except IntegrityError:
+        except Exception:
             return Response(
                 "Пользователь с таким именем или почтой уже существует.",
                 status=status.HTTP_400_BAD_REQUEST

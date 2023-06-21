@@ -2,6 +2,8 @@ from api_yamdb.settings import PATTERN
 import re
 from django.core.exceptions import ValidationError
 
+from api_yamdb.settings import ROLE_TYPE
+
 
 def validate_username_pattern(value):
     """Проверка username на соответствие паттерну."""
@@ -19,6 +21,6 @@ def validate_username_not_me(value):
 
 def validate_role(value):
     """Проверка допустимых ролей."""
-    if value not in ['user', 'moderator', 'admin']:
+    if value not in [role[0] for role in ROLE_TYPE]:
         raise ValidationError('Такой роли не существует.')
     return value
