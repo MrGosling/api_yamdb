@@ -2,6 +2,7 @@ from rest_framework import permissions
 
 
 class AdminPermission(permissions.BasePermission):
+    """Пермишены для вьюсетов CustomUser."""
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (
@@ -9,16 +10,6 @@ class AdminPermission(permissions.BasePermission):
                 or request.user.is_superuser
                 or request.user.is_admin
             )
-
-
-class UserPermission(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.method == 'GET' or request.method == 'PATCH':
-            return request.user.is_authenticated
-        return False
-
-    def has_object_permission(self, request, view, obj):
-        return obj.username == request.user.username
 
 
 class CustomPermission(permissions.BasePermission):

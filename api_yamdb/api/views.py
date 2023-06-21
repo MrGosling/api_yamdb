@@ -1,5 +1,4 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.db.utils import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
@@ -15,7 +14,8 @@ from rest_framework.viewsets import ModelViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 from api.filters import TitleFilter
-from api.mixins import ListCreateDestroyViewSet
+from api.mixins import (ListCreateDestroyViewSet,
+                        RetrieveListUpdateCreateDestroyViewSet)
 from api.permissions import (AdminPermission, CustomPermission,
                              TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
@@ -116,7 +116,7 @@ class CommentViewSet(ModelViewSet):
         )
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(RetrieveListUpdateCreateDestroyViewSet):
     """Вьюсет для управления данными пользователей."""
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
@@ -125,7 +125,11 @@ class UserViewSet(ModelViewSet):
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
     lookup_field = "username"
-    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
     @action(
         detail=False,
@@ -167,7 +171,7 @@ class AuthViewSet(ModelViewSet):
                 username=username,
                 email=email,
             )
-        except IntegrityError:
+        except Exception:
             return Response(
                 "Пользователь с таким именем или почтой уже существует.",
                 status=status.HTTP_400_BAD_REQUEST
