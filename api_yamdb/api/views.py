@@ -57,7 +57,7 @@ class TitleViewSet(ModelViewSet):
         return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
-        queryset = self.queryset.annotate(rating=Avg('reviews__score'))
+        queryset = self.get_queryset()
         obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
         serializer = TitleReadOnlySerializer(obj)
         return Response(serializer.data, status=status.HTTP_200_OK)

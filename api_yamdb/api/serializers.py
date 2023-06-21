@@ -37,7 +37,6 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
         при GET запросе."""
         data = super().to_representation(instance)
         genres_data = GenreSerializer(instance.genre.all(), many=True).data
-        print(genres_data)
         category_data = CategorySerializer(instance.category).data
         data['genre'] = genres_data
         data['category'] = category_data
