@@ -1,16 +1,15 @@
-from django.db.models import Avg
+import datetime as dt
+import re
+
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import CharField, ModelSerializer, Serializer
 from rest_framework.validators import UniqueTogetherValidator
-import datetime as dt
-import re
-
-from api.validators import (validate_username_pattern,
-                            validate_username_not_me,
-                            validate_role)
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
+
+from api.validators import (validate_role, validate_username_not_me,
+                            validate_username_pattern)
 
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
@@ -26,7 +25,8 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
         slug_field='slug',
         # required=True,
     )
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField()
+
     class Meta:
         model = Title
         fields = '__all__'
@@ -36,20 +36,13 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
         """Переопределённая функция, изменяющая представления жанров и моделей
         при GET запросе."""
         data = super().to_representation(instance)
-        # print(data)
         genres_data = GenreSerializer(instance.genre.all(), many=True).data
         print(genres_data)
         category_data = CategorySerializer(instance.category).data
-        # print(category_data)
         data['genre'] = genres_data
         data['category'] = category_data
         return data
 
-    def get_rating(self, obj):
-        """Функция для вычисляемого поля rating."""
-        ratings = Review.objects.filter(title__id=obj.id)
-        score = ratings.aggregate(Avg('score'))['score__avg']
-        return round(score, 2) if score else None
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведений."""
@@ -65,27 +58,10 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         required=True,
     )
-    # rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = '__all__'
         model = Title
-
-    # def to_representation(self, instance):
-    #     """Переопределённая функция, изменяющая представления жанров и моделей
-    #     при GET запросе."""
-    #     data = super().to_representation(instance)
-    #     genres_data = GenreSerializer(instance.genre.all(), many=True).data
-    #     category_data = CategorySerializer(instance.category).data
-    #     data['genre'] = genres_data
-    #     data['category'] = category_data
-    #     return data
-
-    # def get_rating(self, obj):
-    #     """Функция для вычисляемого поля rating."""
-    #     ratings = Review.objects.filter(title__id=obj.id)
-    #     score = ratings.aggregate(Avg('score'))['score__avg']
-    #     return round(score, 2) if score else None
 
     def validate_name(self, value):
         """Валидация имени - не более 256 знаков."""

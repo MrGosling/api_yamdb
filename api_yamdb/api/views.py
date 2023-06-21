@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
@@ -14,13 +15,14 @@ from rest_framework.viewsets import ModelViewSet
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 from api.filters import TitleFilter
-from api.mixins import (ListCreateDestroyViewSet, ListRetrieveViewSet,
+from api.mixins import (ListCreateDestroyViewSet,
                         RetrieveListUpdateCreateDestroyViewSet)
 from api.permissions import (AdminPermission, CustomPermission,
                              TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, PartialUserSerializer, TitleReadOnlySerializer,
-                             ReviewSerializer, TitleSerializer, UserSerializer,
+                             GenreSerializer, PartialUserSerializer,
+                             ReviewSerializer, TitleReadOnlySerializer,
+                             TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
 
@@ -42,28 +44,22 @@ class TitleViewSet(ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        queryset = queryset.annotate(rating=Avg('reviews__score'))
         queryset = queryset.order_by('name')
         return queryset
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
         paginator = self.get_pagination_class()
-        # data = paginator.paginate_queryset(Title.objects.all(), request)
         data = paginator.paginate_queryset(queryset, request)
         serializer = TitleReadOnlySerializer(data, many=True)
         return paginator.get_paginated_response(serializer.data)
-        # return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
     def retrieve(self, request, *args, **kwargs):
-        queryset = self.queryset
-        # print(self.kwargs)
+        queryset = self.queryset.annotate(rating=Avg('reviews__score'))
         obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
-        # print(obj)
         serializer = TitleReadOnlySerializer(obj)
-        # serializer.is_valid(raise_exception=True)
-        # serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
-        # return super().retrieve(request, *args, **kwasrgs)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):

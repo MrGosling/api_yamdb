@@ -21,12 +21,3 @@ class RetrieveListUpdateCreateDestroyViewSet(
 ):
     """Миксин для вюсетов моделей CustomUser."""
     pass
-
-
-class ListRetrieveViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    """Миксин для рид-онли вюсета модели Title."""
-    pass
