@@ -14,33 +14,42 @@ from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
-    name = serializers.CharField(max_length=256)
+    # name = serializers.CharField(max_length=256)
     category = SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
-        required=True,
+        # required=True,
     )
     genre = SlugRelatedField(
         queryset=Genre.objects.all(),
         many=True,
         slug_field='slug',
-        required=True,
+        # required=True,
     )
+    rating = serializers.SerializerMethodField()
     class Meta:
-        fields = '__all__'
         model = Title
-        read_only_fields = '__all__'
+        fields = '__all__'
+        read_only_fields = ('__all__',)
 
     def to_representation(self, instance):
         """Переопределённая функция, изменяющая представления жанров и моделей
         при GET запросе."""
         data = super().to_representation(instance)
+        # print(data)
         genres_data = GenreSerializer(instance.genre.all(), many=True).data
+        print(genres_data)
         category_data = CategorySerializer(instance.category).data
+        # print(category_data)
         data['genre'] = genres_data
         data['category'] = category_data
         return data
 
+    def get_rating(self, obj):
+        """Функция для вычисляемого поля rating."""
+        ratings = Review.objects.filter(title__id=obj.id)
+        score = ratings.aggregate(Avg('score'))['score__avg']
+        return round(score, 2) if score else None
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведений."""
@@ -56,27 +65,27 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         required=True,
     )
-    rating = serializers.SerializerMethodField()
+    # rating = serializers.SerializerMethodField()
 
     class Meta:
         fields = '__all__'
         model = Title
 
-    def to_representation(self, instance):
-        """Переопределённая функция, изменяющая представления жанров и моделей
-        при GET запросе."""
-        data = super().to_representation(instance)
-        genres_data = GenreSerializer(instance.genre.all(), many=True).data
-        category_data = CategorySerializer(instance.category).data
-        data['genre'] = genres_data
-        data['category'] = category_data
-        return data
+    # def to_representation(self, instance):
+    #     """Переопределённая функция, изменяющая представления жанров и моделей
+    #     при GET запросе."""
+    #     data = super().to_representation(instance)
+    #     genres_data = GenreSerializer(instance.genre.all(), many=True).data
+    #     category_data = CategorySerializer(instance.category).data
+    #     data['genre'] = genres_data
+    #     data['category'] = category_data
+    #     return data
 
-    def get_rating(self, obj):
-        """Функция для вычисляемого поля rating."""
-        ratings = Review.objects.filter(title__id=obj.id)
-        score = ratings.aggregate(Avg('score'))['score__avg']
-        return round(score, 2) if score else None
+    # def get_rating(self, obj):
+    #     """Функция для вычисляемого поля rating."""
+    #     ratings = Review.objects.filter(title__id=obj.id)
+    #     score = ratings.aggregate(Avg('score'))['score__avg']
+    #     return round(score, 2) if score else None
 
     def validate_name(self, value):
         """Валидация имени - не более 256 знаков."""
