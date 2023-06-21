@@ -54,5 +54,7 @@ python manage.py runserver
 
 ## Участники 
 [Genek91](https://github.com/Genek91) - управление пользователями (Auth и Users): система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения e-mail, поля.
+
 [shevchukgr](https://github.com/shevchukgr) - категории (Categories), жанры (Genres) и произведения (Titles): модели, view и эндпойнты для них, реализует импорт данных из csv файлов.
+
 [kofan1106](https://github.com/kofan1106) - отзывы (Review) и комментарии (Comments): модели и view, эндпойнты, права доступа для запросов. Рейтинги произведений.

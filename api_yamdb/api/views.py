@@ -19,7 +19,7 @@ from api.mixins import ListCreateDestroyViewSet
 from api.permissions import (AdminPermission, CustomPermission,
                              TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
-                             GenreSerializer, PartialUserSerializer,
+                             GenreSerializer, PartialUserSerializer, TitleReadOnlySerializer,
                              ReviewSerializer, TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
@@ -35,6 +35,13 @@ class TitleViewSet(ModelViewSet):
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
+
+    def get(self, request):
+        data = Title.objects.all()
+        serializer = TitleReadOnlySerializer(data, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    # def post(self, request):
 
 
 class GenreViewSet(ListCreateDestroyViewSet):

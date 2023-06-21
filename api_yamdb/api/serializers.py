@@ -13,6 +13,35 @@ from api.validators import (validate_username_pattern,
 from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
 
+class TitleReadOnlySerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=256)
+    category = SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+        required=True,
+    )
+    genre = SlugRelatedField(
+        queryset=Genre.objects.all(),
+        many=True,
+        slug_field='slug',
+        required=True,
+    )
+    class Meta:
+        fields = '__all__'
+        model = Title
+        read_only_fields = '__all__'
+
+    def to_representation(self, instance):
+        """Переопределённая функция, изменяющая представления жанров и моделей
+        при GET запросе."""
+        data = super().to_representation(instance)
+        genres_data = GenreSerializer(instance.genre.all(), many=True).data
+        category_data = CategorySerializer(instance.category).data
+        data['genre'] = genres_data
+        data['category'] = category_data
+        return data
+
+
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведений."""
     name = serializers.CharField(max_length=256)

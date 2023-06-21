@@ -1,3 +1,4 @@
+import datetime as dt
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -66,7 +67,10 @@ class Category(BaseModel):
 
 class Title(BaseModel):
     """Модель произведений и её привязка к жанрам и категориям."""
-    year = models.IntegerField()
+    year = models.IntegerField(
+        validators=[MaxValueValidator(dt.date.today().year)],
+        db_index=True,
+    )
     description = models.TextField(null=True, blank=True)
     genre = models.ManyToManyField(
         Genre,
