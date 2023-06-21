@@ -92,7 +92,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
@@ -137,3 +137,13 @@ EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
 
 # Шаблон для проверки username
 PATTERN = (r'^[\w.@+-]+$')
+
+# Почта с которой будут отсылаться письма с проверочным токеном
+FROM_EMAIL = 'from@example.com'
+
+# Типы ролей для модели CustomUser
+ROLE_TYPE = [
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+]
