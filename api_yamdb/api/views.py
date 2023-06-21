@@ -1,4 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status
@@ -20,14 +21,15 @@ from api.permissions import (AdminPermission, CustomPermission,
                              TitlesGenresCategoriesPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, PartialUserSerializer,
-                             ReviewSerializer, TitleSerializer, UserSerializer,
+                             ReviewSerializer, TitleReadOnlySerializer,
+                             TitleSerializer, UserSerializer,
                              UserSignupSerializer, UserTokenSerializer)
 from api.utils import confirm_code_send_mail, get_tokens_for_user
 
 
 class TitleViewSet(ModelViewSet):
     """Viewset для объектов модели Title."""
-    queryset = Title.objects.all().order_by('name')
+    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
@@ -35,6 +37,30 @@ class TitleViewSet(ModelViewSet):
         IsAuthenticatedOrReadOnly,
         TitlesGenresCategoriesPermission
     ]
+    pagination_class = PageNumberPagination
+
+    def get_pagination_class(self):
+        return self.pagination_class()
+
+    def get_queryset(self):
+        queryset = (
+            super().get_queryset().annotate
+            (rating=Avg('reviews__score')).order_by('name')
+        )
+        return queryset
+
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
+        paginator = self.get_pagination_class()
+        data = paginator.paginate_queryset(queryset, request)
+        serializer = TitleReadOnlySerializer(data, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
+        serializer = TitleReadOnlySerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GenreViewSet(ListCreateDestroyViewSet):

@@ -19,5 +19,5 @@ class RetrieveListUpdateCreateDestroyViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
-    pass
     """Миксин для вюсетов моделей CustomUser."""
+    pass
