@@ -31,12 +31,12 @@ class CustomUser(AbstractUser):
         blank=False,
     )
     first_name = models.CharField(
-        "Имя",
+        'Имя',
         max_length=150,
         blank=True,
     )
     last_name = models.CharField(
-        "Фамилия",
+        'Фамилия',
         max_length=150,
         blank=True,
     )
@@ -58,10 +58,17 @@ class Genre(BaseModel):
     """Модель жанров."""
     slug = models.SlugField(max_length=50, unique=True)
 
+    def __str__(self) -> str:
+        return f'{self.name}, {self.slug}'
+
 
 class Category(BaseModel):
     """Модель категорий."""
     slug = models.SlugField(max_length=50, unique=True)
+
+    def __str__(self) -> str:
+        d = {'name': self.name, 'slug': self.slug}
+        return f'{d}'
 
 
 class Title(BaseModel):
@@ -145,7 +152,7 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name="comments",
+        related_name='comments',
         verbose_name='Отзыв',
     )
 
