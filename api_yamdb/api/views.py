@@ -18,7 +18,7 @@ from api.filters import TitleFilter
 from api.mixins import (ListCreateDestroyViewSet,
                         RetrieveListUpdateCreateDestroyViewSet)
 from api.permissions import (AdminPermission, CustomPermission,
-                             TitlesGenresCategoriesPermission)
+                             SpecialPermission)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, PartialUserSerializer,
                              ReviewSerializer, TitleReadOnlySerializer,
@@ -29,29 +29,25 @@ from api.utils import confirm_code_send_mail, get_tokens_for_user
 
 class TitleViewSet(ModelViewSet):
     """Viewset для объектов модели Title."""
-    queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        TitlesGenresCategoriesPermission
+        SpecialPermission
     ]
     pagination_class = PageNumberPagination
 
-    def get_pagination_class(self):
-        return self.pagination_class()
-
     def get_queryset(self):
         queryset = (
-            super().get_queryset().annotate
+            Title.objects.all().annotate
             (rating=Avg('reviews__score')).order_by('name')
         )
         return queryset
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
-        paginator = self.get_pagination_class()
+        paginator = self.pagination_class()
         data = paginator.paginate_queryset(queryset, request)
         serializer = TitleReadOnlySerializer(data, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -69,7 +65,7 @@ class GenreViewSet(ListCreateDestroyViewSet):
     serializer_class = GenreSerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        TitlesGenresCategoriesPermission
+        SpecialPermission
     ]
     filter_backends = (SearchFilter,)
     search_fields = ['name']
@@ -81,7 +77,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
     serializer_class = CategorySerializer
     permission_classes = [
         IsAuthenticatedOrReadOnly,
-        TitlesGenresCategoriesPermission
+        SpecialPermission
     ]
     filter_backends = (SearchFilter,)
     search_fields = ['name']
