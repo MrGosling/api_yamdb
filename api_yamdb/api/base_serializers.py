@@ -1,9 +1,9 @@
 import re
 
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 
-class CustomSerializer(serializers.ModelSerializer):
+class CustomSerializer(ModelSerializer):
     """Кастомный сериализатор."""
 
     def validate_slug(self, value):
