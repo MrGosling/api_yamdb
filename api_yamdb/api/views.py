@@ -29,7 +29,6 @@ from api.utils import confirm_code_send_mail, get_tokens_for_user
 
 class TitleViewSet(ModelViewSet):
     """Viewset для объектов модели Title."""
-    serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = TitleFilter
     permission_classes = [
@@ -45,18 +44,11 @@ class TitleViewSet(ModelViewSet):
         )
         return queryset
 
-    def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-        paginator = self.pagination_class()
-        data = paginator.paginate_queryset(queryset, request)
-        serializer = TitleReadOnlySerializer(data, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        obj = get_object_or_404(queryset, pk=self.kwargs.get('pk'))
-        serializer = TitleReadOnlySerializer(obj)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return TitleReadOnlySerializer
+        elif self.request.method in ['POST', 'PATCH', 'DELETE']:
+            return TitleSerializer
 
 
 class GenreViewSet(ListCreateDestroyViewSet):
