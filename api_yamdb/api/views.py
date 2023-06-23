@@ -12,7 +12,7 @@ from rest_framework.permissions import (AllowAny, IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework.serializers import ValidationError
 from rest_framework.viewsets import ModelViewSet
-from reviews.models import Category, CustomUser, Genre, Review, Title
+from reviews.models import Category, CustomUser, Genre, Title
 
 from api.filters import TitleFilter
 from api.mixins import (ListCreateDestroyViewSet,
@@ -107,8 +107,8 @@ class CommentViewSet(ModelViewSet):
 
     def get_review(self):
         """Возвращает объект текущего отзыва."""
-        review_id = self.kwargs.get('review_id')
-        return get_object_or_404(Review, pk=review_id)
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        return title.reviews.get(id=self.kwargs.get('review_id'))
 
     def get_queryset(self):
         """Возвращает queryset c комментариями для текущего отзыва."""

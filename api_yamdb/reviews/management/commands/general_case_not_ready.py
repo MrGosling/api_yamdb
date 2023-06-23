@@ -144,6 +144,7 @@ class Command(BaseCommand):
                         rd[key] = model.objects.get(id=value)
                     rd[key] = row.get(key, None)
                 try:
+                    # print(rd)
                     Title.objects.get(**rd)
                 except Title.DoesNotExist:
                     Title.objects.create(**rd)
@@ -163,11 +164,17 @@ class Command(BaseCommand):
             for field in fields[1:]:
                 d[field.name] = None
             # print(d)
+            print(d)
             for row in reader:
+                print(row)
+                # if row.values() == None:
+
                 # print(row)
                 rd = {}
+                # print(d.keys(), row.values())
                 for key, value in zip(d.keys(), row.values()):
                     # print(key, value, rd)
+                    print(rd)
                     if isinstance(
                         CustomUser._meta.get_field(key),
                         models.ManyToManyField
@@ -181,7 +188,7 @@ class Command(BaseCommand):
                         # Model._meta.get_field(
                         # 'foreign_key_field').related_query_name()
                         # метод .set()????
-                        print(model)
+                        # print(model)
                         # rd[key] = model.
                     if isinstance(
                         CustomUser._meta.get_field(key), models.ForeignKey
@@ -192,9 +199,12 @@ class Command(BaseCommand):
                         # print(model)
                         rd[key] = model.objects.get(id=value)
                     rd[key] = row.get(key, None)
-
+                # if rd[key] is None:
+                #     rd.pop(key)
                 try:
+                    print(rd)
                     CustomUser.objects.get(**rd)
+                    pass
                 except CustomUser.DoesNotExist:
                     CustomUser.objects.create(**rd)
 
