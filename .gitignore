@@ -149,4 +149,4 @@ dmypy.json
 media/
 
 # миграции
-migrations/
+# migrations/
