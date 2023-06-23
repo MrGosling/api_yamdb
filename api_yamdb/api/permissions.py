@@ -27,7 +27,7 @@ class CustomPermission(permissions.BasePermission):
                 )
 
 
-class TitlesGenresCategoriesPermission(permissions.BasePermission):
+class SpecialPermission(permissions.BasePermission):
     """Пермишены для вьюсетов моделей Category, Genre, Title."""
     def has_permission(self, request, view):
         if request.method not in permissions.SAFE_METHODS:

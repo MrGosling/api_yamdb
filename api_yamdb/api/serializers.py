@@ -1,5 +1,4 @@
 import datetime as dt
-import re
 
 from rest_framework import serializers
 from rest_framework.exceptions import MethodNotAllowed
@@ -10,21 +9,26 @@ from reviews.models import Category, Comment, CustomUser, Genre, Review, Title
 
 from api.validators import (validate_role, validate_username_not_me,
                             validate_username_pattern)
+from api.base_serializers import CustomSerializer
+
+
+class CategorySerializer(CustomSerializer):
+    """Сериализатор категорий."""
+    class Meta:
+        fields = ('name', 'slug',)
+        model = Category
+
+
+class GenreSerializer(CustomSerializer):
+    """Сериализатор жанров."""
+    class Meta:
+        fields = ('name', 'slug',)
+        model = Genre
 
 
 class TitleReadOnlySerializer(serializers.ModelSerializer):
-    # name = serializers.CharField(max_length=256)
-    category = SlugRelatedField(
-        queryset=Category.objects.all(),
-        slug_field='slug',
-        # required=True,
-    )
-    genre = SlugRelatedField(
-        queryset=Genre.objects.all(),
-        many=True,
-        slug_field='slug',
-        # required=True,
-    )
+    category = CategorySerializer()
+    genre = GenreSerializer(many=True)
     rating = serializers.IntegerField()
 
     class Meta:
@@ -32,20 +36,9 @@ class TitleReadOnlySerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('__all__',)
 
-    def to_representation(self, instance):
-        """Переопределённая функция, изменяющая представления жанров и моделей
-        при GET запросе."""
-        data = super().to_representation(instance)
-        genres_data = GenreSerializer(instance.genre.all(), many=True).data
-        category_data = CategorySerializer(instance.category).data
-        data['genre'] = genres_data
-        data['category'] = category_data
-        return data
-
 
 class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведений."""
-    name = serializers.CharField(max_length=256)
     category = SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -82,47 +75,7 @@ class TitleSerializer(serializers.ModelSerializer):
             raise MethodNotAllowed('PUT')
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    """Сериализатор категорий."""
-    class Meta:
-        fields = ('name', 'slug',)
-        model = Category
-        extra_kwargs = {
-            'name': {'required': True, 'max_length': 256},
-            'slug': {'required': True, 'max_length': 50},
-        }
-
-    def validate_slug(self, value):
-        """Валидация поля slug на соответствие паттерну."""
-        pattern = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(pattern, value):
-            raise serializers.ValidationError(
-                'Поле slug может содержать буквы латинского алфавита в верхнем'
-                'и нижнем регистре, цифры от 0-9,подчеркивание(_), дефис(-)')
-        return value
-
-
-class GenreSerializer(serializers.ModelSerializer):
-    """Сериализатор жанров."""
-    class Meta:
-        fields = ('name', 'slug',)
-        model = Genre
-        extra_kwargs = {
-            'name': {'required': True, 'max_length': 256},
-            'slug': {'required': True, 'max_length': 50},
-        }
-
-    def validate_slug(self, value):
-        """Валидация поля slug на соответствие паттерну."""
-        pattern = r'^[-a-zA-Z0-9_]+$'
-        if not re.match(pattern, value):
-            raise serializers.ValidationError(
-                'Поле slug может содержать буквы латинского алфавита в верхнем'
-                'и нижнем регистре, цифры от 0-9,подчеркивание(_), дефис(-)')
-        return value
-
-
-class ReviewSerializer(serializers.ModelSerializer):
+class ReviewSerializer(CustomSerializer):
     """Сериализатор отзывов для произведений."""
     author = serializers.SlugRelatedField(
         read_only=True,
