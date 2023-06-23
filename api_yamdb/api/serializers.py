@@ -1,7 +1,6 @@
 import datetime as dt
 
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import CharField, ModelSerializer, Serializer
 from rest_framework.validators import UniqueTogetherValidator
@@ -67,13 +66,6 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Вы из будущего?')
         return value
 
-    def update(self, instance, validated_data):
-        """Запрет метода PUT."""
-        if self.partial:
-            return super().update(instance, validated_data)
-        else:
-            raise MethodNotAllowed('PUT')
-
 
 class ReviewSerializer(CustomSerializer):
     """Сериализатор отзывов для произведений."""
@@ -132,7 +124,8 @@ class UserSerializer(ModelSerializer):
         return validate_role(value)
 
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class PartialUserSerializer(ModelSerializer):
@@ -145,7 +138,8 @@ class PartialUserSerializer(ModelSerializer):
         read_only_fields = ('role',)
 
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class UserSignupSerializer(Serializer):
@@ -157,11 +151,9 @@ class UserSignupSerializer(Serializer):
         model = CustomUser
         fields = ('email', 'username')
 
-    def validate(self, value):
-        return validate_username_not_me(value)
-
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class UserTokenSerializer(ModelSerializer):

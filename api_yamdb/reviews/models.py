@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
         ],
     )
     role = models.CharField(
-        'Роль',
+        verbose_name='Роль',
         max_length=10,
         blank=False,
         choices=ROLE_TYPE,
@@ -31,17 +31,17 @@ class CustomUser(AbstractUser):
         blank=False,
     )
     first_name = models.CharField(
-        'Имя',
+        verbose_name='Имя',
         max_length=150,
         blank=True,
     )
     last_name = models.CharField(
-        'Фамилия',
+        verbose_name='Фамилия',
         max_length=150,
         blank=True,
     )
     bio = models.TextField(
-        'Биография',
+        verbose_name='Биография',
         blank=True,
     )
 
@@ -74,13 +74,19 @@ class Category(BaseModel):
 class Title(BaseModel):
     """Модель произведений и её привязка к жанрам и категориям."""
     year = models.IntegerField(
+        verbose_name='Год выхода',
         validators=[MaxValueValidator(dt.date.today().year)],
         db_index=True,
     )
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(
+        verbose_name='Описание',
+        null=True,
+        blank=True
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
+        verbose_name='Жанр',
     )
     category = models.ForeignKey(
         Category,
@@ -88,6 +94,7 @@ class Title(BaseModel):
         null=True,
         related_name='titles',
         on_delete=models.SET_NULL,
+        verbose_name='Категория',
     )
 
 
