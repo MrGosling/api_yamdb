@@ -74,13 +74,19 @@ class Category(BaseModel):
 class Title(BaseModel):
     """Модель произведений и её привязка к жанрам и категориям."""
     year = models.IntegerField(
+        verbose_name='Год выхода',
         validators=[MaxValueValidator(dt.date.today().year)],
         db_index=True,
     )
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(
+        verbose_name='Описание',
+        null=True,
+        blank=True
+    )
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
+        verbose_name='Жанр',
     )
     category = models.ForeignKey(
         Category,
@@ -88,6 +94,7 @@ class Title(BaseModel):
         null=True,
         related_name='titles',
         on_delete=models.SET_NULL,
+        verbose_name='Категория',
     )
 
 

@@ -1,7 +1,6 @@
 import datetime as dt
 
 from rest_framework import serializers
-from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import CharField, ModelSerializer, Serializer
 from rest_framework.validators import UniqueTogetherValidator
@@ -66,13 +65,6 @@ class TitleSerializer(serializers.ModelSerializer):
         if value > dt.datetime.now().year:
             raise serializers.ValidationError('Вы из будущего?')
         return value
-
-    def update(self, instance, validated_data):
-        """Запрет метода PUT."""
-        if self.partial:
-            return super().update(instance, validated_data)
-        else:
-            raise MethodNotAllowed('PUT')
 
 
 class ReviewSerializer(CustomSerializer):
