@@ -14,7 +14,7 @@ def validate_username_pattern(value):
 
 def validate_username_not_me(value):
     """Проверка на создание username - me."""
-    if value['username'] == 'me':
+    if value == 'me':
         raise ValidationError('Имя пользователя me запрещено!')
     return value
 

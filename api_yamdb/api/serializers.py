@@ -132,7 +132,8 @@ class UserSerializer(ModelSerializer):
         return validate_role(value)
 
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class PartialUserSerializer(ModelSerializer):
@@ -145,7 +146,8 @@ class PartialUserSerializer(ModelSerializer):
         read_only_fields = ('role',)
 
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class UserSignupSerializer(Serializer):
@@ -157,11 +159,9 @@ class UserSignupSerializer(Serializer):
         model = CustomUser
         fields = ('email', 'username')
 
-    def validate(self, value):
-        return validate_username_not_me(value)
-
     def validate_username(self, value):
-        return validate_username_pattern(value)
+        value = validate_username_pattern(value)
+        return validate_username_not_me(value)
 
 
 class UserTokenSerializer(ModelSerializer):

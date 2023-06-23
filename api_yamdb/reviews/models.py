@@ -19,7 +19,7 @@ class CustomUser(AbstractUser):
         ],
     )
     role = models.CharField(
-        'Роль',
+        verbose_name='Роль',
         max_length=10,
         blank=False,
         choices=ROLE_TYPE,
@@ -31,17 +31,17 @@ class CustomUser(AbstractUser):
         blank=False,
     )
     first_name = models.CharField(
-        'Имя',
+        verbose_name='Имя',
         max_length=150,
         blank=True,
     )
     last_name = models.CharField(
-        'Фамилия',
+        verbose_name='Фамилия',
         max_length=150,
         blank=True,
     )
     bio = models.TextField(
-        'Биография',
+        verbose_name='Биография',
         blank=True,
     )
 
