@@ -131,7 +131,7 @@ class UserViewSet(RetrieveListUpdateCreateDestroyViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
-    lookup_field = "username"
+    lookup_field = 'username'
 
     def update(self, request, *args, **kwargs):
         if request.method == 'PUT':
@@ -180,7 +180,7 @@ class AuthViewSet(ModelViewSet):
             )
         except Exception:
             return Response(
-                "Пользователь с таким именем или почтой уже существует.",
+                'Пользователь с таким именем или почтой уже существует.',
                 status=status.HTTP_400_BAD_REQUEST
             )
 
